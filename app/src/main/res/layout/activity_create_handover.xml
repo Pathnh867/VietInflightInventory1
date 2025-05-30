@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- VietJet Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/vietjet_red"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp">
+
+        <!-- VietJet Logo -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="VietJet Air"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-light" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="IFS"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tạo bàn giao"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Menu Button -->
+        <ImageView
+            android:id="@+id/btn_menu"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_menu"
+            app:tint="@color/white"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:layout_marginStart="16dp" />
+
+    </LinearLayout>
+
+    <!-- Main Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Form Fields Row 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <!-- Ngày bay -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="* Ngày bay"
+                        android:textSize="14sp"
+                        android:textColor="#E53E3E"
+                        android:layout_marginBottom="8dp" />
+
+                    <EditText
+                        android:id="@+id/et_flight_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/edittext_border"
+                        android:hint="Chọn ngày"
+                        android:textSize="14sp"
+                        android:paddingHorizontal="12dp"
+                        android:drawableEnd="@drawable/ic_calendar"
+                        android:drawablePadding="8dp"
+                        android:focusable="false"
+                        android:clickable="true" />
+
+                </LinearLayout>
+
+                <!-- Mã tàu -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="* Mã tàu"
+                        android:textSize="14sp"
+                        android:textColor="#E53E3E"
+                        android:layout_marginBottom="8dp" />
+
+                    <Spinner
+                        android:id="@+id/spinner_aircraft_code"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/spinner_border" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Form Fields Row 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <!-- Mã chuyến bay -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="* Mã chuyến bay"
+                        android:textSize="14sp"
+                        android:textColor="#E53E3E"
+                        android:layout_marginBottom="8dp" />
+
+                    <EditText
+                        android:id="@+id/et_flight_code"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/edittext_border"
+                        android:hint="VJ"
+                        android:textSize="14sp"
+                        android:paddingHorizontal="12dp"
+                        android:inputType="textCapCharacters" />
+
+                </LinearLayout>
+
+                <!-- Loại chuyến bay -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Loại chuyến bay"
+                        android:textSize="14sp"
+                        android:textColor="#333333"
+                        android:layout_marginBottom="8dp" />
+
+                    <Spinner
+                        android:id="@+id/spinner_flight_type"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/spinner_border" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Action Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <!-- ĐÓNG Button -->
+                <Button
+                    android:id="@+id/btn_close"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="ĐÓNG"
+                    android:textColor="@color/vietjet_red"
+                    android:textStyle="bold"
+                    android:background="@drawable/button_outline_red"
+                    android:layout_marginEnd="8dp" />
+
+                <!-- TẢI Button -->
+                <Button
+                    android:id="@+id/btn_load"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="TẢI"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:background="@drawable/button_red"
+                    android:layout_marginStart="8dp" />
+
+            </LinearLayout>
+
+            <!-- Category Tabs -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tab_hot_meal"
+                        android:layout_width="120dp"
+                        android:layout_height="40dp"
+                        android:text="Suất Ăn Nóng"
+                        android:textSize="12sp"
+                        android:textColor="@color/vietjet_red"
+                        android:gravity="center"
+                        android:background="@drawable/tab_selected"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tab_fnb"
+                        android:layout_width="80dp"
+                        android:layout_height="40dp"
+                        android:text="FnB"
+                        android:textSize="12sp"
+                        android:textColor="#999999"
+                        android:gravity="center"
+                        android:background="@drawable/tab_unselected" />
+
+                    <TextView
+                        android:id="@+id/tab_souvenir"
+                        android:layout_width="120dp"
+                        android:layout_height="40dp"
+                        android:text="Hàng Lưu Niệm"
+                        android:textSize="12sp"
+                        android:textColor="#999999"
+                        android:gravity="center"
+                        android:background="@drawable/tab_unselected" />
+
+                    <TextView
+                        android:id="@+id/tab_business"
+                        android:layout_width="120dp"
+                        android:layout_height="40dp"
+                        android:text="Sboss Business"
+                        android:textSize="12sp"
+                        android:textColor="#999999"
+                        android:gravity="center"
+                        android:background="@drawable/tab_unselected" />
+
+                    <TextView
+                        android:id="@+id/tab_other"
+                        android:layout_width="80dp"
+                        android:layout_height="40dp"
+                        android:text="Khác"
+                        android:textSize="12sp"
+                        android:textColor="#999999"
+                        android:gravity="center"
+                        android:background="@drawable/tab_unselected" />
+
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
+            <!-- Search Bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/search_background"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
+                android:layout_marginBottom="16dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_search"
+                    app:tint="#999999"
+                    android:layout_marginEnd="8dp" />
+
+                <EditText
+                    android:id="@+id/et_search"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:hint="Tìm kiếm"
+                    android:textSize="14sp"
+                    android:background="@android:color/transparent"
+                    android:textColorHint="#999999" />
+
+            </LinearLayout>
+
+            <!-- Total Count -->
+            <TextView
+                android:id="@+id/tv_total_count"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tổng cộng: 0"
+                android:textSize="14sp"
+                android:textColor="@color/vietjet_red"
+                android:gravity="end"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Product Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="#FFA500"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Sản phẩm"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Số lượng"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_arrow_drop_down"
+                    app:tint="@color/white"
+                    android:layout_marginStart="4dp" />
+
+            </LinearLayout>
+
+            <!-- Products RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_products"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:nestedScrollingEnabled="false" />
+
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/layout_empty"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@color/white"
+                android:visibility="visible">
+
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_inventory_empty"
+                    app:tint="#CCCCCC"
+                    android:layout_marginBottom="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Trống"
+                    android:textSize="16sp"
+                    android:textColor="#CCCCCC" />
+
+            </LinearLayout>
+
+            <!-- Create Handover Button -->
+            <Button
+                android:id="@+id/btn_create_handover"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="TẠO BÀN GIAO"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:background="@drawable/button_red"
+                android:layout_marginTop="24dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

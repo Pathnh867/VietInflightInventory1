@@ -1,0 +1,26 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.VietInflightInventory" parent="Theme.Material3.DayNight">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/vietjet_red</item>
+        <item name="colorPrimaryVariant">@color/vietjet_red</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/blue_info</item>
+        <item name="colorSecondaryVariant">@color/blue_info</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+    </style>
+
+    <!-- Theme cho CreateHandover - KHÔNG CÓ ACTION BAR -->
+    <style name="Theme.VietInflightInventory.NoActionBar" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/vietjet_red</item>
+        <item name="colorPrimaryVariant">@color/vietjet_red</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/blue_info</item>
+        <item name="colorSecondaryVariant">@color/blue_info</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+</resources>
