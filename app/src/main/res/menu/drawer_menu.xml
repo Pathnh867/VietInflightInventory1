@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/nav_create" android:title="Tạo bàn giao" android:icon="@drawable/ic_handover"/>
+    <item android:id="@+id/nav_receive" android:title="Nhận bàn giao" android:icon="@drawable/ic_inventory"/>
+    <item android:id="@+id/nav_report" android:title="Báo cáo" android:icon="@drawable/ic_analytics"/>
+    <!-- Các item chung -->
+    <item android:id="@+id/nav_create_user" android:title="Tạo người dùng" android:icon="@drawable/ic_add_user"/>
+    <item android:id="@+id/nav_manage_user" android:title="Quản lý người dùng" android:icon="@drawable/ic_manage_user"/>
+    <item android:id="@+id/nav_account" android:title="Thông tin tài khoản" android:icon="@drawable/ic_person"/>
+    <item android:id="@+id/nav_password" android:title="Đổi mật khẩu" android:icon="@drawable/ic_info"/>
+    <item android:id="@+id/nav_logout" android:title="Đăng xuất" android:icon="@drawable/ic_login"/>
+</menu>

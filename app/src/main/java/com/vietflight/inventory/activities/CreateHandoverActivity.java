@@ -2,9 +2,12 @@ package com.vietflight.inventory.activities;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.Menu;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -16,9 +19,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.vietflight.inventory.R;
@@ -26,504 +34,448 @@ import com.vietflight.inventory.adapters.ProductHandoverAdapter;
 import com.vietflight.inventory.models.Product;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class CreateHandoverActivity extends AppCompatActivity {
 
-    private EditText etFlightDate, etFlightCode, etSearch;
-    private Spinner spinnerAircraftCode, spinnerFlightType;
-    private Button btnClose, btnLoad, btnCreateHandover;
-    private ImageView btnMenu;
+    private EditText etFlightDate, etFlightCode;
+    private Spinner spinnerAircraft, spinnerFlightType;
+    private Button btnLoad, btnCreateHandover;
     private TextView tvTotalCount;
     private RecyclerView rvProducts;
     private LinearLayout layoutEmpty;
 
-    // Category tabs
-    private TextView tabHotMeal, tabFnb, tabSouvenir, tabBusiness, tabOther;
-    private TextView currentSelectedTab;
-
-    // Data
     private FirebaseFirestore db;
     private List<Product> allProducts = new ArrayList<>();
-    private List<Product> filteredProducts = new ArrayList<>();
+    private List<Product> currentTabProducts = new ArrayList<>();
+    private Map<String, Integer> quantityMap = new HashMap<>();
+
+    private ImageView btnMenu;
+    private String handoverId = null;
     private ProductHandoverAdapter adapter;
-    private String selectedCategory = "HOT_MEAL";
+    private String currentCategory = "HOT_MEAL";
+
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_handover);
 
-        initViews();
-        initFirestore();
-        setupSpinners();
-        setupTabs();
-        setupRecyclerView();
-        setupClickListeners();
-        setupSearch();
-
-        // Load products for default category
-        loadProducts();
-    }
-
-    private void initViews() {
-        etFlightDate = findViewById(R.id.et_flight_date);
-        etFlightCode = findViewById(R.id.et_flight_code);
-        etSearch = findViewById(R.id.et_search);
-        spinnerAircraftCode = findViewById(R.id.spinner_aircraft_code);
-        spinnerFlightType = findViewById(R.id.spinner_flight_type);
-        btnClose = findViewById(R.id.btn_close);
-        btnLoad = findViewById(R.id.btn_load);
-        btnCreateHandover = findViewById(R.id.btn_create_handover);
-        btnMenu = findViewById(R.id.btn_menu);
-        tvTotalCount = findViewById(R.id.tv_total_count);
-        rvProducts = findViewById(R.id.rv_products);
-        layoutEmpty = findViewById(R.id.layout_empty);
-
-        // Category tabs
-        tabHotMeal = findViewById(R.id.tab_hot_meal);
-        tabFnb = findViewById(R.id.tab_fnb);
-        tabSouvenir = findViewById(R.id.tab_souvenir);
-        tabBusiness = findViewById(R.id.tab_business);
-        tabOther = findViewById(R.id.tab_other);
-
-        currentSelectedTab = tabHotMeal;
-    }
-
-    private void initFirestore() {
         db = FirebaseFirestore.getInstance();
+        initUI();
+        setupSpinners();
+        setupDatePicker();
+        setupCategoryTabs();
+        setupButtons();
+
+        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navView = findViewById(R.id.nav_view);
+        sharedPreferences = getSharedPreferences("VietFlightPrefs", MODE_PRIVATE);
+
+        String role = sharedPreferences.getString("role", "");
+        android.view.Menu menu = navView.getMenu();
+
+        if ("admin".equalsIgnoreCase(role)) {
+            menu.findItem(R.id.nav_create).setVisible(false);
+            menu.findItem(R.id.nav_receive).setVisible(false);
+            menu.findItem(R.id.nav_report).setVisible(false);
+            menu.findItem(R.id.nav_create_user).setVisible(true);
+            menu.findItem(R.id.nav_manage_user).setVisible(true);
+        } else {
+            menu.findItem(R.id.nav_create).setVisible(true);
+            menu.findItem(R.id.nav_receive).setVisible(true);
+            menu.findItem(R.id.nav_report).setVisible(true);
+            menu.findItem(R.id.nav_create_user).setVisible(false);
+            menu.findItem(R.id.nav_manage_user).setVisible(false);
+        }
+
+        ImageView btnMenu = findViewById(R.id.btn_menu);
+        btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+        navView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_password) {
+                startActivity(new Intent(this, ChangePasswordActivity.class));
+            } else if (id == R.id.nav_account) {
+                startActivity(new Intent(this, ProfileActivity.class));
+            } else if (id == R.id.nav_create) {
+                startActivity(new Intent(this, CreateHandoverActivity.class));
+            } else if (id == R.id.nav_receive) {
+                startActivity(new Intent(this, ReceiveHandoverActivity.class));
+            }else if (id == R.id.nav_report) {
+                startActivity(new Intent(this, ReportActivity.class));
+            } else if (id == R.id.nav_create_user) {
+                startActivity(new Intent(this, CreateUserActivity.class));
+            } else if (id == R.id.nav_manage_user) {
+                startActivity(new Intent(this, ManageUserActivity.class));
+            } else if (id == R.id.nav_logout) {
+                sharedPreferences.edit().clear().apply();
+                startActivity(new Intent(this, LoginActivity.class));
+                finish();
+            }
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
+
+        handoverId = getIntent().getStringExtra("handoverId"); // Nếu null tức là tạo mới
+        if (handoverId != null) {
+            loadHandoverFromFirestore(handoverId);
+        }
+
     }
 
-    private void setupSpinners() {
-        // Aircraft Code Spinner
-        String[] aircraftCodes = {"Chọn mã tàu", "VN-A629", "VN-A630", "VN-A631", "VN-A632"};
-        ArrayAdapter<String> aircraftAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, aircraftCodes);
-        aircraftAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerAircraftCode.setAdapter(aircraftAdapter);
+    private void loadHandoverFromFirestore(String handoverId) {
+        db.collection("handovers").document(handoverId).get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        Boolean isLocked = doc.getBoolean("isLocked");
 
-        // Flight Type Spinner
-        String[] flightTypes = {"Loại chuyến bay", "COM 2025", "TOP-UP", "COM INDIA"};
-        ArrayAdapter<String> flightAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, flightTypes);
-        flightAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerFlightType.setAdapter(flightAdapter);
+                        String flightDate = doc.getString("flightDate");
+                        if (flightDate != null) etFlightDate.setText(flightDate);
+
+                        String flightCode = doc.getString("flightCode");
+                        if (flightCode != null) etFlightCode.setText(flightCode);
+
+                        String aircraft = doc.getString("aircraftCode");
+                        if (aircraft != null) setSpinnerToValue(spinnerAircraft, aircraft);
+
+                        String flightType = doc.getString("flightType");
+                        if (flightType != null) setSpinnerToValue(spinnerFlightType, flightType);
+
+                        List<Map<String, Object>> items = (List<Map<String, Object>>) doc.get("items");
+                        allProducts.clear();
+                        quantityMap.clear();
+                        for (Map<String, Object> map : items) {
+                            Product p = new Product();
+                            p.setId((String) map.get("id")); // DÙNG id (document id sản phẩm Firestore)
+                            p.setCode((String) map.get("code"));
+                            p.setName((String) map.get("name"));
+                            p.setCategory((String) map.get("category"));
+                            p.setImageName((String) map.get("imageName"));
+                            p.setPrice(((Number) map.get("price")).intValue());
+                            int qty = ((Number) map.get("quantity")).intValue();
+                            allProducts.add(p);
+                            quantityMap.put(p.getId(), qty); // key là id
+                        }
+                        filterByCategory(currentCategory);
+
+                        // Gọi hàm handleLockedState để khóa/mở giao diện
+                        handleLockedState(isLocked != null && isLocked);
+                    }
+                });
     }
 
-    private void setupTabs() {
-        tabHotMeal.setOnClickListener(v -> selectTab(tabHotMeal, "HOT_MEAL"));
-        tabFnb.setOnClickListener(v -> selectTab(tabFnb, "FNB"));
-        tabSouvenir.setOnClickListener(v -> selectTab(tabSouvenir, "SOUVENIR"));
-        tabBusiness.setOnClickListener(v -> selectTab(tabBusiness, "BUSINESS"));
-        tabOther.setOnClickListener(v -> selectTab(tabOther, "OTHER"));
-    }
+    private void handleLockedState(boolean isLocked) {
+        adapter.setEditable(!isLocked);
+        btnCreateHandover.setEnabled(!isLocked);
+        btnCreateHandover.setVisibility(isLocked ? View.GONE : View.VISIBLE);
 
-    private void selectTab(TextView tab, String category) {
-        // Reset previous tab
-        currentSelectedTab.setBackgroundResource(R.drawable.tab_unselected);
-        currentSelectedTab.setTextColor(getResources().getColor(R.color.text_secondary));
-
-        // Set new tab
-        currentSelectedTab = tab;
-        tab.setBackgroundResource(R.drawable.tab_selected);
-        tab.setTextColor(getResources().getColor(R.color.vietjet_red));
-
-        selectedCategory = category;
-        loadProducts();
-        String flightType = spinnerFlightType.getSelectedItem().toString();
-        if (!flightType.equals("Loại chuyến bay")) {
-            loadDefaultQuantities(flightType);
+        if (isLocked) {
+            Toast.makeText(this, "Bàn giao đã bị khóa, bạn không thể chỉnh sửa!", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void setupRecyclerView() {
-        adapter = new ProductHandoverAdapter(filteredProducts, new ProductHandoverAdapter.OnQuantityChangeListener() {
-            @Override
-            public void onQuantityChanged() {
-                updateTotalCount();
-                updateCreateButtonVisibility();
-            }
-        });
+    private void initUI() {
+        etFlightDate = findViewById(R.id.et_flight_date);
+        etFlightCode = findViewById(R.id.et_flight_code);
+        spinnerAircraft = findViewById(R.id.spinner_aircraft_code);
+        spinnerFlightType = findViewById(R.id.spinner_flight_type);
+        btnLoad = findViewById(R.id.btn_load);
+        btnCreateHandover = findViewById(R.id.btn_create_handover);
+        tvTotalCount = findViewById(R.id.tv_total_count);
+        layoutEmpty = findViewById(R.id.layout_empty);
+        rvProducts = findViewById(R.id.rv_products);
         rvProducts.setLayoutManager(new LinearLayoutManager(this));
+
+        adapter = new ProductHandoverAdapter(currentTabProducts, quantityMap, this::updateTotalCount);
         rvProducts.setAdapter(adapter);
     }
 
-    private void setupClickListeners() {
-        btnMenu.setOnClickListener(v -> {
-            Toast.makeText(this, "Menu clicked", Toast.LENGTH_SHORT).show();
+    private void setupSpinners() {
+        db.collection("aircraft")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    List<String> aircraftCodes = new ArrayList<>();
+                    for (DocumentSnapshot doc : snapshot) {
+                        String code = doc.getString("code");
+                        if (code != null) aircraftCodes.add(code);
+                    }
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                            android.R.layout.simple_spinner_item, aircraftCodes);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinnerAircraft.setAdapter(adapter);
+                });
+
+        List<String> flightTypes = Arrays.asList("COM 2025", "TOP-UP", "COM INDIA");
+        ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, flightTypes);
+        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerFlightType.setAdapter(typeAdapter);
+    }
+
+    private void setupDatePicker() {
+        etFlightDate.setFocusable(false);
+        etFlightDate.setOnClickListener(v -> {
+            Calendar calendar = Calendar.getInstance();
+            new DatePickerDialog(this, (view, year, month, day) -> {
+                String dateStr = String.format(Locale.US, "%02d/%02d/%04d", day, month + 1, year);
+                etFlightDate.setText(dateStr);
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
         });
+    }
 
-        etFlightDate.setOnClickListener(v -> showDatePicker());
+    private void setupCategoryTabs() {
+        findViewById(R.id.tab_hot_meal).setOnClickListener(v -> filterByCategory("HOT_MEAL"));
+        findViewById(R.id.tab_fnb).setOnClickListener(v -> filterByCategory("FNB"));
+        findViewById(R.id.tab_souvenir).setOnClickListener(v -> filterByCategory("MER"));
+        findViewById(R.id.tab_business).setOnClickListener(v -> filterByCategory("SBOSS"));
+        findViewById(R.id.tab_other).setOnClickListener(v -> filterByCategory("OTHER"));
+    }
 
-        btnClose.setOnClickListener(v -> onBackPressed());
+    private void filterByCategory(String category) {
+        currentCategory = category;
 
-        btnLoad.setOnClickListener(v -> loadFlightData());
+        // ✅ Reset tab UI
+        findViewById(R.id.tab_hot_meal).setBackgroundResource(R.drawable.tab_unselected);
+        findViewById(R.id.tab_fnb).setBackgroundResource(R.drawable.tab_unselected);
+        findViewById(R.id.tab_souvenir).setBackgroundResource(R.drawable.tab_unselected);
+        findViewById(R.id.tab_business).setBackgroundResource(R.drawable.tab_unselected);
+        findViewById(R.id.tab_other).setBackgroundResource(R.drawable.tab_unselected);
 
+        // ✅ Đánh dấu tab đang chọn
+        switch (category) {
+            case "HOT_MEAL":
+                findViewById(R.id.tab_hot_meal).setBackgroundResource(R.drawable.tab_selected);
+                break;
+            case "FNB":
+                findViewById(R.id.tab_fnb).setBackgroundResource(R.drawable.tab_selected);
+                break;
+            case "MER":
+                findViewById(R.id.tab_souvenir).setBackgroundResource(R.drawable.tab_selected);
+                break;
+            case "SBOSS":
+                findViewById(R.id.tab_business).setBackgroundResource(R.drawable.tab_selected);
+                break;
+            case "OTHER":
+                findViewById(R.id.tab_other).setBackgroundResource(R.drawable.tab_selected);
+                break;
+        }
+
+        // ✅ Lọc dữ liệu như cũ
+        currentTabProducts.clear();
+        for (Product p : allProducts) {
+            if (p.getCategory().equalsIgnoreCase(category)) {
+                currentTabProducts.add(p);
+            }
+        }
+
+        layoutEmpty.setVisibility(currentTabProducts.isEmpty() ? View.VISIBLE : View.GONE);
+        adapter.notifyDataSetChanged();
+        updateTotalCount();
+    }
+
+
+    private void updateTotalCount() {
+        int total = 0;
+        for (int qty : quantityMap.values()) total += qty;
+        tvTotalCount.setText("Tổng cộng: " + total);
+    }
+
+    private void setupButtons() {
+        btnLoad.setOnClickListener(v -> loadProductTemplates());
         btnCreateHandover.setOnClickListener(v -> createHandover());
     }
 
-    private void setupSearch() {
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+    private void loadProductTemplates() {
+        final String flightDate = etFlightDate.getText().toString().trim();
+        final String flightCode = etFlightCode.getText().toString().trim().toUpperCase();
+        final String aircraftCode = spinnerAircraft.getSelectedItem() != null ? spinnerAircraft.getSelectedItem().toString() : "";
+        final String flightType = spinnerFlightType.getSelectedItem() != null ? spinnerFlightType.getSelectedItem().toString() : "";
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterProducts(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-    }
-
-    private void showDatePicker() {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this,
-                (view, selectedYear, selectedMonth, selectedDay) -> {
-                    String date = String.format("%02d/%02d/%d", selectedDay, selectedMonth + 1, selectedYear);
-                    etFlightDate.setText(date);
-                },
-                year, month, day
-        );
-        datePickerDialog.show();
-    }
-
-    private void loadProducts() {
-        // For demo purposes, create sample products
-        if (allProducts.isEmpty()) {
-            loadAllProducts();
+        if (flightDate.isEmpty() || flightCode.isEmpty() || aircraftCode.isEmpty() || flightType.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập đủ thông tin chuyến bay!", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        // Filter theo category hiện tại
-        filterProducts(etSearch.getText().toString());
+        // Tìm xem đã có handover cho chuyến này chưa
+        db.collection("handovers")
+                .whereEqualTo("flightDate", flightDate)
+                .whereEqualTo("flightNumber", flightCode)
+                .whereEqualTo("aircraftId", aircraftCode)
+                .whereEqualTo("handoverType", flightType)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        // ĐÃ CÓ BÀN GIAO: load lại bàn giao cũ lên UI
+                        DocumentSnapshot doc = querySnapshot.getDocuments().get(0);
+                        handoverId = doc.getId(); // Lưu lại để nếu cần update
+                        Boolean isLocked = doc.getBoolean("isLocked");
+
+                        // Gán dữ liệu chuyến bay lên UI nếu cần
+                        etFlightDate.setText(doc.getString("flightDate"));
+                        etFlightCode.setText(doc.getString("flightCode"));
+                        // Nếu muốn set lại spinner:
+                        String aircraft = doc.getString("aircraftCode");
+                        if (aircraft != null) setSpinnerToValue(spinnerAircraft, aircraft);
+                        String type = doc.getString("flightType");
+                        if (type != null) setSpinnerToValue(spinnerFlightType, type);
+
+                        // Load sản phẩm
+                        List<Map<String, Object>> items = (List<Map<String, Object>>) doc.get("items");
+                        allProducts.clear();
+                        quantityMap.clear();
+                        for (Map<String, Object> map : items) {
+                            Product p = new Product();
+                            p.setId((String) map.get("id"));
+                            p.setCode((String) map.get("code"));
+                            p.setName((String) map.get("name"));
+                            p.setCategory((String) map.get("category"));
+                            p.setImageName((String) map.get("imageName"));
+                            p.setPrice(((Number) map.get("price")).intValue());
+                            int qty = ((Number) map.get("quantity")).intValue();
+                            allProducts.add(p);
+                            quantityMap.put(p.getId(), qty);
+                        }
+                        filterByCategory(currentCategory);
+
+                        // Gọi hàm khóa nếu bị khóa
+                        handleLockedState(isLocked != null && isLocked);
+
+                        Toast.makeText(this, "Đã tải bàn giao đã tạo!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // CHƯA CÓ BÀN GIAO: tạo mới template như cũ
+                        loadNewProductTemplatesByFlightType(flightType);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Lỗi khi tải bàn giao!", Toast.LENGTH_SHORT).show();
+                });
     }
 
-    private void createSampleProducts() {
-        allProducts.clear();
-
-        switch (selectedCategory) {
-            case "HOT_MEAL":
-                allProducts.add(new Product("HM001", "Cơm gà teriyaki", "HOT_MEAL", "suất", 85000));
-                allProducts.add(new Product("HM002", "Cơm bò lúc lắc", "HOT_MEAL", "suất", 95000));
-                allProducts.add(new Product("HM003", "Mì Ý sốt bò bằm", "HOT_MEAL", "suất", 90000));
-                allProducts.add(new Product("HM004", "Cơm chiên dương châu", "HOT_MEAL", "suất", 80000));
-                break;
-
-            case "FNB":
-                allProducts.add(new Product("FB001", "Nước suối 500ml", "FNB", "chai", 15000));
-                allProducts.add(new Product("FB002", "Coca Cola", "FNB", "lon", 25000));
-                allProducts.add(new Product("FB003", "Cà phê đen", "FNB", "ly", 35000));
-                allProducts.add(new Product("FB004", "Trà xanh", "FNB", "ly", 30000));
-                allProducts.add(new Product("FB005", "Bánh quy", "FNB", "gói", 20000));
-                break;
-
-            case "SOUVENIR":
-                allProducts.add(new Product("SV001", "Móc khóa VietJet", "SOUVENIR", "cái", 50000));
-                allProducts.add(new Product("SV002", "Áo thun VietJet", "SOUVENIR", "cái", 250000));
-                allProducts.add(new Product("SV003", "Mũ VietJet", "SOUVENIR", "cái", 150000));
-                break;
-
-            case "BUSINESS":
-                allProducts.add(new Product("BS001", "Set ăn Business", "BUSINESS", "set", 200000));
-                allProducts.add(new Product("BS002", "Rượu vang đỏ", "BUSINESS", "chai", 300000));
-                break;
-
-            case "OTHER":
-                allProducts.add(new Product("OT001", "Khăn ướt", "OTHER", "gói", 5000));
-                allProducts.add(new Product("OT002", "Túi giấy", "OTHER", "cái", 3000));
-                break;
-        }
-
-        filterProducts(etSearch.getText().toString());
-    }
-
-    private void filterProducts(String query) {
-        filteredProducts.clear();
-
-        for (Product product : allProducts) {
-            // Sử dụng getCategoryName() thay vì getCategory()
-            String productCategory = product.getCategoryName();
-            if (productCategory == null) {
-                continue; // Bỏ qua sản phẩm không có category
-            }
-
-            // Lọc theo category VÀ search query
-            boolean matchCategory = productCategory.equals(selectedCategory);
-            boolean matchQuery = query.isEmpty() ||
-                    product.getName().toLowerCase().contains(query.toLowerCase()) ||
-                    product.getCode().toLowerCase().contains(query.toLowerCase());
-
-            if (matchCategory && matchQuery) {
-                filteredProducts.add(product);
-            }
-        }
-
-        adapter.notifyDataSetChanged();
-        updateEmptyState();
-        updateTotalCount();
-    }
-
-    private void updateEmptyState() {
-        if (filteredProducts.isEmpty()) {
-            rvProducts.setVisibility(View.GONE);
-            layoutEmpty.setVisibility(View.VISIBLE);
-        } else {
-            rvProducts.setVisibility(View.VISIBLE);
-            layoutEmpty.setVisibility(View.GONE);
-        }
-    }
-
-    private void updateTotalCount() {
-        int totalCount = 0;
-        for (Product product : allProducts) {
-            totalCount += product.getQuantity();
-        }
-        tvTotalCount.setText("Tổng cộng: " + totalCount);
-    }
-
-    private void updateCreateButtonVisibility() {
-        boolean hasQuantity = false;
-        for (Product product : allProducts) {
-            if (product.getQuantity() > 0) {
-                hasQuantity = true;
+    /** Hàm này dùng để set spinner về đúng giá trị khi load bàn giao cũ */
+    private void setSpinnerToValue(Spinner spinner, String value) {
+        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
+        if (adapter == null) return;
+        for (int i = 0; i < adapter.getCount(); i++) {
+            if (adapter.getItem(i).toString().equalsIgnoreCase(value)) {
+                spinner.setSelection(i);
                 break;
             }
         }
-        btnCreateHandover.setVisibility(hasQuantity ? View.VISIBLE : View.GONE);
     }
 
-    private void loadFlightData() {
-        String flightDate = etFlightDate.getText().toString().trim();
-        String flightCode = etFlightCode.getText().toString().trim();
-        String aircraftCode = spinnerAircraftCode.getSelectedItem().toString();
-        String flightType = spinnerFlightType.getSelectedItem().toString();
+    /** Logic load sản phẩm template khi CHƯA có bàn giao */
+    private void loadNewProductTemplatesByFlightType(String flightType) {
+        db.collection("products")
+                .whereEqualTo("is_active", true)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    allProducts.clear();
+                    quantityMap.clear();
 
-        if (validateFlightInput(flightDate, flightCode, aircraftCode)) {
-            Toast.makeText(this, "Đã tải dữ liệu chuyến bay", Toast.LENGTH_SHORT).show();
-            loadDefaultQuantities(flightType);
-        }
+                    for (DocumentSnapshot doc : querySnapshot) {
+                        Product p = doc.toObject(Product.class);
+                        if (p == null) continue;
+                        p.setId(doc.getId());
+                        allProducts.add(p);
+
+                        int defaultQty = 0;
+                        if (!"TOP-UP".equalsIgnoreCase(flightType)) {
+                            switch (flightType) {
+                                case "COM 2025":
+                                    if ("HOT_MEAL".equalsIgnoreCase(p.getCategory())) defaultQty = 30;
+                                    else if ("FNB".equalsIgnoreCase(p.getCategory())) defaultQty = 50;
+                                    else if ("MER".equalsIgnoreCase(p.getCategory())) defaultQty = 5;
+                                    else if ("SBOSS".equalsIgnoreCase(p.getCategory())) defaultQty = 2;
+                                    break;
+                                case "COM INDIA":
+                                    if ("HOT_MEAL".equalsIgnoreCase(p.getCategory())) defaultQty = 25;
+                                    else if ("FNB".equalsIgnoreCase(p.getCategory())) defaultQty = 35;
+                                    else if ("MER".equalsIgnoreCase(p.getCategory())) defaultQty = 3;
+                                    break;
+                            }
+                        }
+                        quantityMap.put(p.getId(), defaultQty);
+                    }
+                    filterByCategory(currentCategory);
+                    btnCreateHandover.setVisibility(View.VISIBLE);
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Không tải được sản phẩm", Toast.LENGTH_SHORT).show());
     }
 
-    private void loadDefaultQuantities(String flightType) {
-        // Load default quantities based on flight type
-        for (Product product : allProducts) {
-           switch (flightType){
-               case "COM 2025":
-                   product.setQuantity(getDefaultDomesticQuantity(product.getCode()));
-                   break;
-               case "TOP-UP":
-                    product.setQuantity(0);
-                    break;
-               case "COM INDIA":
-                   product.setQuantity(getDefaultInternationalQuantity(product.getCode()));
-                   break;
-           }
-        }
-        adapter.notifyDataSetChanged();
-        updateTotalCount();
-        updateCreateButtonVisibility();
-    }
-
-    private int getDefaultDomesticQuantity(String productCode) {
-        switch (productCode) {
-            case "HM001": return 30;
-            case "HM002": return 25;
-            case "FB001": return 100;
-            case "FB002": return 50;
-            case "FB003": return 30;
-            case "FB004": return 40;
-            case "SV001": return 2;
-            case "SV002": return 3;
-            default: return 0;
-        }
-    }
-
-    private int getDefaultInternationalQuantity(String productCode) {
-        switch (productCode) {
-            case "HM001": return 50;
-            case "HM002": return 40;
-            case "FB001": return 150;
-            case "FB002": return 80;
-            case "FB003": return 50;
-            default: return 0;
-        }
-    }
 
     private void createHandover() {
         String flightDate = etFlightDate.getText().toString().trim();
         String flightCode = etFlightCode.getText().toString().trim();
-        String aircraftCode = spinnerAircraftCode.getSelectedItem().toString();
-        String flightType = spinnerFlightType.getSelectedItem().toString();
+        String aircraftCode = spinnerAircraft.getSelectedItem() != null ? spinnerAircraft.getSelectedItem().toString() : "";
+        String flightType = spinnerFlightType.getSelectedItem() != null ? spinnerFlightType.getSelectedItem().toString() : "";
 
-        if (!validateInput(flightDate, flightCode, aircraftCode, flightType)) {
+        if (flightDate.isEmpty() || flightCode.isEmpty() || aircraftCode.isEmpty() || quantityMap.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập đủ thông tin và chọn ít nhất 1 sản phẩm", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Tạo danh sách sản phẩm có số lượng > 0
+        // Lấy thông tin người tạo bàn giao
+        String userId = sharedPreferences.getString("user_id", "");
+        String fullname = sharedPreferences.getString("fullname", "");
+        String role = sharedPreferences.getString("role", "");
+        String employeeId = sharedPreferences.getString("employee_id", "");
+        String department = sharedPreferences.getString("department", "");
+
+        Map<String, Object> createdBy = new HashMap<>();
+        createdBy.put("user_id", userId);
+        createdBy.put("fullname", fullname);
+        createdBy.put("role", role);
+        createdBy.put("employee_id", employeeId);
+        createdBy.put("department", department);
+
         List<Map<String, Object>> items = new ArrayList<>();
-        for (Product product : allProducts) {
-            if (product.getQuantity() > 0) {
+        for (Product p : allProducts) {
+            int qty = quantityMap.getOrDefault(p.getId(), 0);
+            if (qty > 0) {
                 Map<String, Object> item = new HashMap<>();
-                item.put("code", product.getCode());
-                item.put("name", product.getName());
-                item.put("quantity", product.getQuantity());
-                item.put("price", product.getPrice());
-                item.put("category", product.getCategoryName());
+                item.put("id", p.getId());
+                item.put("code", p.getCode());
+                item.put("name", p.getName());
+                item.put("category", p.getCategory());
+                item.put("imageName", p.getImageName());
+                item.put("price", p.getPrice());
+                item.put("quantity", qty);
                 items.add(item);
             }
         }
 
-        // Tạo handover với đầy đủ thông tin
         Map<String, Object> handover = new HashMap<>();
+        handover.put("flightNumber", flightCode);
         handover.put("flightDate", flightDate);
-        handover.put("flightCode", flightCode);
-        handover.put("aircraftCode", aircraftCode);
-        handover.put("flightType", flightType);
-        handover.put("items", items);                    // ← QUAN TRỌNG!
-        handover.put("totalItems", getTotalQuantity());
+        handover.put("aircraftId", aircraftCode);
+        handover.put("handoverType", flightType);
+        handover.put("items", items);
+        handover.put("received", false);
+        handover.put("status", "pending");
+        handover.put("isLocked", false);
+        handover.put("createdBy", createdBy);
         handover.put("createdAt", System.currentTimeMillis());
-        handover.put("status", "CREATED");
 
-        // Lưu vào Firebase
-        FirebaseFirestore.getInstance()
-                .collection("handovers")
+        db.collection("handovers")
                 .add(handover)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(this, "✅ Lưu thành công!", Toast.LENGTH_SHORT).show();
-
-                    Intent intent = new Intent(CreateHandoverActivity.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
-                    finish();
+                .addOnSuccessListener(doc -> {
+                    handoverId = doc.getId();
+                    loadHandoverFromFirestore(handoverId);
+                    Toast.makeText(this, "Đã tạo bàn giao thành công", Toast.LENGTH_SHORT).show();
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "❌ Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e -> Toast.makeText(this, "Lỗi tạo bàn giao", Toast.LENGTH_SHORT).show());
     }
-    private int getTotalQuantity() {
-        int total = 0;
-        for (Product product : allProducts) {
-            total += product.getQuantity();
-        }
-        return total;
-    }
-    private boolean validateInput(String flightDate, String flightCode, String aircraftCode, String flightType) {
-        if (flightDate.isEmpty()) {
-            Toast.makeText(this, "Vui lòng chọn ngày bay", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (flightCode.isEmpty()) {
-            etFlightCode.setError("Vui lòng nhập mã chuyến bay");
-            etFlightCode.requestFocus();
-            return false;
-        }
-        if (aircraftCode.equals("Chọn mã tàu")) {
-            Toast.makeText(this, "Vui lòng chọn mã tàu", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (flightType.equals("Loại chuyến bay")) {
-            Toast.makeText(this, "Vui lòng chọn loại chuyến bay", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean validateFlightInput(String flightDate, String flightCode, String aircraftCode) {
-        if (flightDate.isEmpty()) {
-            Toast.makeText(this, "Vui lòng chọn ngày bay", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (flightCode.isEmpty()) {
-            etFlightCode.setError("Vui lòng nhập mã chuyến bay");
-            etFlightCode.requestFocus();
-            return false;
-        }
-        if (aircraftCode.equals("Chọn mã tàu")) {
-            Toast.makeText(this, "Vui lòng chọn mã tàu", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
-    }
-    private void loadAllProducts() {
-        allProducts.clear();
-
-        // HOT_MEAL
-        Product hm001 = new Product("HM001", "Cơm gà teriyaki", "HOT_MEAL", "suất", 85000);
-        hm001.setCategoryName("HOT_MEAL"); // Set categoryName để filter
-        allProducts.add(hm001);
-
-        Product hm002 = new Product("HM002", "Cơm bò lúc lắc", "HOT_MEAL", "suất", 95000);
-        hm002.setCategoryName("HOT_MEAL");
-        allProducts.add(hm002);
-
-        Product hm003 = new Product("HM003", "Mì Ý sốt bò bằm", "HOT_MEAL", "suất", 90000);
-        hm003.setCategoryName("HOT_MEAL");
-        allProducts.add(hm003);
-
-        Product hm004 = new Product("HM004", "Cơm chiên dương châu", "HOT_MEAL", "suất", 80000);
-        hm004.setCategoryName("HOT_MEAL");
-        allProducts.add(hm004);
-
-        // FNB
-        Product fb001 = new Product("FB001", "Nước suối 500ml", "FNB", "chai", 15000);
-        fb001.setCategoryName("FNB");
-        allProducts.add(fb001);
-
-        Product fb002 = new Product("FB002", "Coca Cola", "FNB", "lon", 25000);
-        fb002.setCategoryName("FNB");
-        allProducts.add(fb002);
-
-        Product fb003 = new Product("FB003", "Cà phê đen", "FNB", "ly", 35000);
-        fb003.setCategoryName("FNB");
-        allProducts.add(fb003);
-
-        Product fb004 = new Product("FB004", "Trà xanh", "FNB", "ly", 30000);
-        fb004.setCategoryName("FNB");
-        allProducts.add(fb004);
-
-        Product fb005 = new Product("FB005", "Bánh quy", "FNB", "gói", 20000);
-        fb005.setCategoryName("FNB");
-        allProducts.add(fb005);
-
-        // SOUVENIR
-        Product sv001 = new Product("SV001", "Móc khóa VietJet", "SOUVENIR", "cái", 50000);
-        sv001.setCategoryName("SOUVENIR");
-        allProducts.add(sv001);
-
-        Product sv002 = new Product("SV002", "Áo thun VietJet", "SOUVENIR", "cái", 250000);
-        sv002.setCategoryName("SOUVENIR");
-        allProducts.add(sv002);
-
-        Product sv003 = new Product("SV003", "Mũ VietJet", "SOUVENIR", "cái", 150000);
-        sv003.setCategoryName("SOUVENIR");
-        allProducts.add(sv003);
-
-        // BUSINESS
-        Product bs001 = new Product("BS001", "Set ăn Business", "BUSINESS", "set", 20000);
-        bs001.setCategoryName("BUSINESS");
-        allProducts.add(bs001);
-
-        Product bs002 = new Product("BS002", "Rượu vang đỏ", "BUSINESS", "chai", 30000);
-        bs002.setCategoryName("BUSINESS");
-        allProducts.add(bs002);
-
-        // OTHER
-        Product ot001 = new Product("OT001", "Khăn ướt", "OTHER", "gói", 5000);
-        ot001.setCategoryName("OTHER");
-        allProducts.add(ot001);
-
-        Product ot002 = new Product("OT002", "Túi giấy", "OTHER", "cái", 3000);
-        ot002.setCategoryName("OTHER");
-        allProducts.add(ot002);
+    private void logout() {
+        sharedPreferences.edit().clear().apply();
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
 }
+
+

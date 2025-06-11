@@ -40,7 +40,16 @@ public class LoginActivity extends AppCompatActivity {
 
         // Kiểm tra đã đăng nhập chưa
         if (isUserLoggedIn()) {
-            navigateToCreateHandover();
+            String role = sharedPreferences.getString("role", "");
+            if ("supply_staff".equalsIgnoreCase(role)) {
+                navigateToCreateHandover();
+            } else if ("flight_attendant".equalsIgnoreCase(role)) {
+                navigateToReceiveHandover();
+            } else if ("admin".equalsIgnoreCase(role)) {
+                navigateToCreateUser();
+            } else {
+                //logout
+            }
             return;
         }
 
@@ -112,9 +121,24 @@ public class LoginActivity extends AppCompatActivity {
 
                     if (task.isSuccessful() && !task.getResult().isEmpty()) {
                         DocumentSnapshot userDoc = task.getResult().getDocuments().get(0);
+                        // Nếu cần, kiểm tra is_active ở đây
+
                         saveUserSession(userDoc);
-                        showSuccessMessage(userDoc.getString("fullname"));
-                        navigateToCreateHandover();
+
+                        String fullname = userDoc.getString("fullname");
+                        String role = userDoc.getString("role");
+                        showSuccessMessage(fullname);
+
+                        // Điều hướng theo role
+                        if ("supply_staff".equalsIgnoreCase(role)) {
+                            navigateToCreateHandover();
+                        } else if ("flight_attendant".equalsIgnoreCase(role)) {
+                            navigateToReceiveHandover();
+                        } else if ("admin".equalsIgnoreCase(role)) {
+                            navigateToCreateUser();
+                        } else {
+                            showErrorMessage("Vai trò không hợp lệ!");
+                        }
                     } else {
                         showErrorMessage("Tên đăng nhập hoặc mật khẩu không đúng!");
                     }
@@ -124,6 +148,12 @@ public class LoginActivity extends AppCompatActivity {
                     showErrorMessage("Lỗi kết nối: " + e.getMessage());
                 });
     }
+    private void navigateToReceiveHandover() {
+        Intent intent = new Intent(LoginActivity.this, ReceiveHandoverActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
 
     private void saveUserSession(DocumentSnapshot userDoc) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -131,6 +161,13 @@ public class LoginActivity extends AppCompatActivity {
         editor.putString("username", userDoc.getString("username"));
         editor.putString("fullname", userDoc.getString("fullname"));
         editor.putString("role", userDoc.getString("role"));
+        editor.putString("email", userDoc.getString("email"));
+        editor.putString("company", userDoc.getString("company"));
+        editor.putString("location", userDoc.getString("location"));
+        editor.putString("phone", userDoc.getString("phone"));
+        editor.putString("employee_id", userDoc.getString("employee_id"));  // Thêm dòng này
+        editor.putString("department", userDoc.getString("department"));    // Thêm dòng này
+        editor.putBoolean("is_active", userDoc.getBoolean("is_active") != null && userDoc.getBoolean("is_active"));
         editor.putBoolean("is_logged_in", true);
         editor.apply();
     }
@@ -155,6 +192,12 @@ public class LoginActivity extends AppCompatActivity {
 
     private void navigateToCreateHandover() {
         Intent intent = new Intent(LoginActivity.this, CreateHandoverActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+    private void navigateToCreateUser() {
+        Intent intent = new Intent(LoginActivity.this, CreateUserActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

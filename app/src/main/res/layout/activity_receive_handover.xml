@@ -52,7 +52,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tạo bàn giao"
+                android:text="Nhận bàn giao"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -370,7 +370,7 @@
 
                 <!-- Products RecyclerView -->
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_products"
+                    android:id="@+id/rv_products_receive"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/white"
@@ -378,7 +378,7 @@
 
                 <!-- Empty State -->
                 <LinearLayout
-                    android:id="@+id/layout_empty"
+                    android:id="@+id/layout_empty_receive"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:orientation="vertical"
@@ -404,10 +404,10 @@
 
                 <!-- Create Handover Button -->
                 <Button
-                    android:id="@+id/btn_create_handover"
+                    android:id="@+id/btn_confirm_receive"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
-                    android:text="TẠO BÀN GIAO"
+                    android:text="XÁC NHẬN BÀN GIAO"
                     android:textColor="@color/white"
                     android:textStyle="bold"
                     android:background="@drawable/button_red"

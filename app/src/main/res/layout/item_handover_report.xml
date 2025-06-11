@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:elevation="3dp"
+    android:radius="12dp"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="14dp">
+
+        <!-- Header: Thông tin chuyến bay -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="6dp">
+
+            <TextView
+                android:id="@+id/tv_flight_code"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="VJ123 | 24/06/2024"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#EA0029"/>
+
+            <TextView
+                android:id="@+id/tv_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đã nhận"
+                android:textColor="#388E3C"
+                android:textStyle="bold"
+                android:paddingStart="10dp"/>
+        </LinearLayout>
+
+        <!-- Các thông tin chi tiết -->
+        <TextView
+            android:id="@+id/tv_aircraft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tàu bay: VN-A123"
+            android:textColor="#444"
+            android:textSize="14sp"
+            android:layout_marginBottom="2dp"/>
+
+        <TextView
+            android:id="@+id/tv_flight_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Loại chuyến bay: COM 2025"
+            android:textColor="#444"
+            android:textSize="14sp"
+            android:layout_marginBottom="2dp"/>
+
+        <TextView
+            android:id="@+id/tv_created_by"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tạo bởi: Nguyễn Văn A"
+            android:textColor="#444"
+            android:textSize="13sp"
+            android:layout_marginBottom="2dp"/>
+
+        <TextView
+            android:id="@+id/tv_received_by"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nhận bởi: Trần Thị B (nếu có)"
+            android:textColor="#444"
+            android:textSize="13sp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Nút mở khóa (chỉ hiển thị nếu đã nhận bàn giao) -->
+        <Button
+            android:id="@+id/btn_unlock"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="MỞ KHÓA"
+            android:backgroundTint="#EA0029"
+            android:textColor="#fff"
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:layout_gravity="end"
+            android:elevation="1dp"/>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -60,16 +60,16 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // Cập nhật để mở ReceiveHandoverActivity
         cardHandoverList.setOnClickListener(v -> {
-            Toast.makeText(this, "Danh sách bàn giao - Coming soon!", Toast.LENGTH_SHORT).show();
-            // TODO: Navigate to HandoverListActivity
+            Intent intent = new Intent(MainActivity.this, ReceiveHandoverActivity.class);
+            startActivity(intent);
         });
 
         cardProducts.setOnClickListener(v -> {
             Toast.makeText(this, "Quản lý sản phẩm - Coming soon!", Toast.LENGTH_SHORT).show();
             // TODO: Navigate to ProductsActivity
         });
-
 
         cardReports.setOnClickListener(v -> {
             Toast.makeText(this, "Báo cáo - Coming soon!", Toast.LENGTH_SHORT).show();
@@ -82,7 +82,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.nav_handovers).setOnClickListener(v -> {
-            Toast.makeText(this, "Bàn giao - Coming soon!", Toast.LENGTH_SHORT).show();
+            // Mở trang nhận bàn giao
+            Intent intent = new Intent(MainActivity.this, ReceiveHandoverActivity.class);
+            startActivity(intent);
         });
 
         findViewById(R.id.nav_profile).setOnClickListener(v -> {

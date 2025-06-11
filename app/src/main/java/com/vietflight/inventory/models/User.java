@@ -5,6 +5,9 @@ public class User {
     private String username;
     private String fullName;
     private String email;
+    private Number phone;
+    private String location;
+    private String company;
     private String role; // "admin", "staff", "attendant"
     private String avatar;
     private long createdAt;
@@ -45,4 +48,28 @@ public class User {
 
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }
+
+    public Number getPhone() {
+        return phone;
+    }
+
+    public void setPhone(Number phone) {
+        this.phone = phone;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
+    }
 }

@@ -38,6 +38,34 @@
             android:name=".activities.CreateHandoverActivity"
             android:exported="false"
             android:theme="@style/Theme.VietInflightInventory.NoActionBar" />
+        <activity
+            android:name=".activities.ReceiveHandoverActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VietInflightInventory.NoActionBar" />
+        <activity
+            android:name=".activities.ReportActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VietInflightInventory.NoActionBar" />
+        <activity
+            android:name=".activities.CreateUserActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VietInflightInventory.NoActionBar" />
+        <activity
+            android:name=".activities.ManageUserActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VietInflightInventory.NoActionBar" />
+        <activity
+            android:name=".activities.EditUserActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VietInflightInventory.NoActionBar" />
+        <activity
+            android:name=".activities.ProfileActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VietInflightInventory.NoActionBar" />
+        <activity
+            android:name=".activities.ChangePasswordActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VietInflightInventory.NoActionBar" />
 
     </application>
 

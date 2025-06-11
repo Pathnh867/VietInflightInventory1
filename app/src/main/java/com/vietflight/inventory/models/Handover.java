@@ -1,6 +1,7 @@
 package com.vietflight.inventory.models;
 
 import java.util.List;
+import java.util.Map;
 
 public class Handover {
     private String id;
@@ -20,6 +21,9 @@ public class Handover {
     private boolean isLocked;
     private String notes;
     private List<HandoverItem> items;
+
+    private Map<String, Object> createdByMap;
+    private Map<String, Object> receivedByMap;
 
     public Handover() {}
 
@@ -88,4 +92,20 @@ public class Handover {
 
     public List<HandoverItem> getItems() { return items; }
     public void setItems(List<HandoverItem> items) { this.items = items; }
+
+    public Map<String, Object> getCreatedByMap() {
+        return createdByMap;
+    }
+
+    public void setCreatedByMap(Map<String, Object> createdByMap) {
+        this.createdByMap = createdByMap;
+    }
+
+    public Map<String, Object> getReceivedByMap() {
+        return receivedByMap;
+    }
+
+    public void setReceivedByMap(Map<String, Object> receivedByMap) {
+        this.receivedByMap = receivedByMap;
+    }
 }
