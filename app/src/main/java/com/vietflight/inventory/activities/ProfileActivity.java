@@ -43,6 +43,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navView = findViewById(R.id.nav_view);
+        setupNavHeader();
         tvAvatar = findViewById(R.id.tv_avatar);
         tvFullname = findViewById(R.id.tv_fullname);
         etEmail = findViewById(R.id.et_email);
@@ -187,5 +188,27 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void showToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+    private void setupNavHeader() {
+        android.view.View header = navView.getHeaderView(0);
+        if (header != null) {
+            TextView navAvatar = header.findViewById(R.id.tv_nav_avatar);
+            TextView navFullname = header.findViewById(R.id.tv_nav_fullname);
+            String fullnamePref = sharedPreferences.getString("fullname", "");
+            navFullname.setText(fullnamePref);
+            if (!TextUtils.isEmpty(fullnamePref)) {
+                String[] parts = fullnamePref.trim().split("\\s+");
+                String initials = "";
+                if (parts.length >= 2) {
+                    initials += parts[parts.length - 2].substring(0, 1);
+                    initials += parts[parts.length - 1].substring(0, 1);
+                } else {
+                    initials += parts[0].substring(0, 1);
+                }
+                navAvatar.setText(initials.toUpperCase());
+            } else {
+                navAvatar.setText("?");
+            }
+        }
     }
 }

@@ -12,6 +12,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -59,10 +60,11 @@ public class CreateUserActivity extends AppCompatActivity {
         btnCreateUser = findViewById(R.id.btn_update_profile);
         autoRole = findViewById(R.id.auto_role);
         ivShowHidePassword = findViewById(R.id.iv_show_hide_password);
+        ivShowHidePassword.setOnClickListener(v -> togglePassword());
 
         db = FirebaseFirestore.getInstance();
         sharedPreferences = getSharedPreferences("VietFlightPrefs", MODE_PRIVATE);
-
+        setupNavHeader();
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navView = findViewById(R.id.nav_view);
@@ -225,4 +227,28 @@ public class CreateUserActivity extends AppCompatActivity {
         startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
+    private void setupNavHeader() {
+        android.view.View header = navView.getHeaderView(0);
+        if (header != null) {
+            TextView tvAvatar = header.findViewById(R.id.tv_nav_avatar);
+            TextView tvFullname = header.findViewById(R.id.tv_nav_fullname);
+            String fullname = sharedPreferences.getString("fullname", "");
+            tvFullname.setText(fullname);
+            if (!TextUtils.isEmpty(fullname)) {
+                String[] parts = fullname.trim().split("\\s+");
+                String initials = "";
+                if (parts.length >= 2) {
+                    initials += parts[parts.length - 2].substring(0, 1);
+                    initials += parts[parts.length - 1].substring(0, 1);
+                } else {
+                    initials += parts[0].substring(0, 1);
+                }
+                tvAvatar.setText(initials.toUpperCase());
+            } else {
+                tvAvatar.setText("?");
+            }
+        }
+    }
+
+
 }

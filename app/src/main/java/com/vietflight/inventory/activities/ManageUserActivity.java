@@ -12,6 +12,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import android.widget.TextView;
+import android.text.TextUtils;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
@@ -59,6 +61,7 @@ public class ManageUserActivity extends AppCompatActivity {
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navView = findViewById(R.id.nav_view);
+        setupNavHeader();
         rvUsers = findViewById(R.id.rv_users);
         layoutEmpty = findViewById(R.id.layout_empty);
         etSearch = findViewById(R.id.et_search);
@@ -218,5 +221,27 @@ public class ManageUserActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadAllUsers();
+    }
+    private void setupNavHeader() {
+        android.view.View header = navView.getHeaderView(0);
+        if (header != null) {
+            TextView tvAvatar = header.findViewById(R.id.tv_nav_avatar);
+            TextView tvFullname = header.findViewById(R.id.tv_nav_fullname);
+            String fullname = sharedPreferences.getString("fullname", "");
+            tvFullname.setText(fullname);
+            if (!TextUtils.isEmpty(fullname)) {
+                String[] parts = fullname.trim().split("\\s+");
+                String initials = "";
+                if (parts.length >= 2) {
+                    initials += parts[parts.length - 2].substring(0, 1);
+                    initials += parts[parts.length - 1].substring(0, 1);
+                } else {
+                    initials += parts[0].substring(0, 1);
+                }
+                tvAvatar.setText(initials.toUpperCase());
+            } else {
+                tvAvatar.setText("?");
+            }
+        }
     }
 }
