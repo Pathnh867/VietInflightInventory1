@@ -4,10 +4,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -59,6 +61,7 @@ public class EditUserActivity extends AppCompatActivity {
 
         String role = sharedPreferences.getString("role", "");
         android.view.Menu menu = navView.getMenu();
+        setupNavHeader();
 
         if ("admin".equalsIgnoreCase(role)) {
             menu.findItem(R.id.nav_create).setVisible(false);
@@ -183,5 +186,28 @@ public class EditUserActivity extends AppCompatActivity {
             isPasswordVisible = true;
         }
         etPassword.setSelection(etPassword.getText().length());
+    }
+
+    private void setupNavHeader() {
+        android.view.View header = navView.getHeaderView(0);
+        if (header != null) {
+            TextView tvAvatar = header.findViewById(R.id.tv_nav_avatar);
+            TextView tvFullname = header.findViewById(R.id.tv_nav_fullname);
+            String fullname = sharedPreferences.getString("fullname", "");
+            tvFullname.setText(fullname);
+            if (!TextUtils.isEmpty(fullname)) {
+                String[] parts = fullname.trim().split("\\s+");
+                String initials = "";
+                if (parts.length >= 2) {
+                    initials += parts[parts.length - 2].substring(0, 1);
+                    initials += parts[parts.length - 1].substring(0, 1);
+                } else {
+                    initials += parts[0].substring(0, 1);
+                }
+                tvAvatar.setText(initials.toUpperCase());
+            } else {
+                tvAvatar.setText("?");
+            }
+        }
     }
 }

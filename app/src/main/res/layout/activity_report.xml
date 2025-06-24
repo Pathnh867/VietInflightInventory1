@@ -58,11 +58,12 @@
                 android:drawableStart="@drawable/ic_calendar"
                 android:drawablePadding="6dp"
                 android:padding="10dp"/>
+
             <Button
                 android:id="@+id/btn_load_report"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:text="Tải"/>
+                android:text="Tải" />
         </LinearLayout>
 
         <!-- Danh sách bàn giao -->

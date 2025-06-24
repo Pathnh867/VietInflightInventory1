@@ -157,7 +157,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private void setupNavHeader(){
         android.view.View header = navView.getHeaderView(0);
         if (header != null){
-           TextView tvAvatar = header.findViewById(R.id.tv_nav_avartar);
+           TextView tvAvatar = header.findViewById(R.id.tv_nav_avatar);
            TextView tvFullname = header.findViewById(R.id.tv_nav_fullname);
            String fullname = sharedPreferences.getString("fullname","");
            tvFullname.setText(fullname);

@@ -77,6 +77,7 @@ public class CreateHandoverActivity extends AppCompatActivity {
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navView = findViewById(R.id.nav_view);
         sharedPreferences = getSharedPreferences("VietFlightPrefs", MODE_PRIVATE);
+        setupNavHeader(navView);
 
         String role = sharedPreferences.getString("role", "");
         android.view.Menu menu = navView.getMenu();
@@ -476,6 +477,31 @@ public class CreateHandoverActivity extends AppCompatActivity {
         startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
+
+    private void setupNavHeader(NavigationView navView){
+        android.view.View header = navView.getHeaderView(0);
+        if (header != null){
+            TextView tvAvatar = header.findViewById(R.id.tv_nav_avatar);
+            TextView tvFullname = header.findViewById(R.id.tv_nav_fullname);
+            String fullname = sharedPreferences.getString("fullname","");
+            tvFullname.setText(fullname);
+            if (!TextUtils.isEmpty(fullname)){
+                String[] parts = fullname.trim().split("\\s+");
+                String initials = "";
+                if (parts.length >= 2) {
+                    initials += parts[parts.length - 2].substring(0,1);
+                    initials += parts[parts.length - 1].substring(0,1);
+                } else {
+                    initials += parts[0].substring(0, 1);
+                }
+                tvAvatar.setText(initials.toUpperCase());
+            } else {
+                tvAvatar.setText("?");
+            }
+        }
+    }
+
+
 }
 
 
