@@ -2,6 +2,7 @@
     <item android:id="@+id/nav_create" android:title="Tạo bàn giao" android:icon="@drawable/ic_handover"/>
     <item android:id="@+id/nav_receive" android:title="Nhận bàn giao" android:icon="@drawable/ic_inventory"/>
     <item android:id="@+id/nav_report" android:title="Báo cáo" android:icon="@drawable/ic_analytics"/>
+    <item android:id="@+id/nav_products" android:title="Quản lý sản phẩm" android:icon="@drawable/ic_inventory"/>
     <!-- Các item chung -->
     <item android:id="@+id/nav_create_user" android:title="Tạo người dùng" android:icon="@drawable/ic_add_user"/>
     <item android:id="@+id/nav_manage_user" android:title="Quản lý người dùng" android:icon="@drawable/ic_manage_user"/>

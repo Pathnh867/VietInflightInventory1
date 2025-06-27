@@ -23,6 +23,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.vietflight.inventory.R;
+import com.vietflight.inventory.utils.HashUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -78,6 +79,7 @@ public class CreateUserActivity extends AppCompatActivity {
             menu.findItem(R.id.nav_report).setVisible(false);
             menu.findItem(R.id.nav_create_user).setVisible(true);
             menu.findItem(R.id.nav_manage_user).setVisible(true);
+            menu.findItem(R.id.nav_products).setVisible(true);
         } else {
             menu.findItem(R.id.nav_create).setVisible(true);
             menu.findItem(R.id.nav_receive).setVisible(true);
@@ -104,6 +106,8 @@ public class CreateUserActivity extends AppCompatActivity {
                 startActivity(new Intent(this, CreateUserActivity.class));
             } else if (id == R.id.nav_manage_user) {
                 startActivity(new Intent(this, ManageUserActivity.class));
+            } else if (id == R.id.nav_products) {
+                startActivity(new Intent(this, ProductsActivity.class));
             } else if (id == R.id.nav_logout) {
                 sharedPreferences.edit().clear().apply();
                 startActivity(new Intent(this, LoginActivity.class));
@@ -174,7 +178,7 @@ public class CreateUserActivity extends AppCompatActivity {
                         user.put("email", email);
                         user.put("fullname", fullname);
                         user.put("username", username);
-                        user.put("password", password); // TODO: hash nếu cần
+                        user.put("password", HashUtils.sha256(password));
                         user.put("phone", phone);
                         user.put("company", company);
                         user.put("location", location);

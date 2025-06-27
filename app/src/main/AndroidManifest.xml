@@ -66,6 +66,16 @@
             android:name=".activities.ChangePasswordActivity"
             android:exported="false"
             android:theme="@style/Theme.VietInflightInventory.NoActionBar" />
+        <activity
+            android:name=".activities.ProductsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VietInflightInventory.NoActionBar" />
+
+        <activity
+            android:name=".activities.AddProductActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VietInflightInventory.NoActionBar" />
+
 
     </application>
 

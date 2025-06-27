@@ -19,6 +19,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.vietflight.inventory.R;
+import com.vietflight.inventory.utils.HashUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -69,6 +70,7 @@ public class EditUserActivity extends AppCompatActivity {
             menu.findItem(R.id.nav_report).setVisible(false);
             menu.findItem(R.id.nav_create_user).setVisible(true);
             menu.findItem(R.id.nav_manage_user).setVisible(true);
+            menu.findItem(R.id.nav_products).setVisible(true);
         } else {
             menu.findItem(R.id.nav_create).setVisible(true);
             menu.findItem(R.id.nav_receive).setVisible(true);
@@ -95,6 +97,8 @@ public class EditUserActivity extends AppCompatActivity {
                 startActivity(new Intent(this, CreateUserActivity.class));
             } else if (id == R.id.nav_manage_user) {
                 startActivity(new Intent(this, ManageUserActivity.class));
+            } else if (id == R.id.nav_products) {
+                startActivity(new Intent(this, ProductsActivity.class));
             } else if (id == R.id.nav_logout) {
                 sharedPreferences.edit().clear().apply();
                 startActivity(new Intent(this, LoginActivity.class));
@@ -124,7 +128,7 @@ public class EditUserActivity extends AppCompatActivity {
                         etFullname.setText(doc.getString("fullname"));
                         etUsername.setText(doc.getString("username"));
                         etPhone.setText(doc.getString("phone"));
-                        etPassword.setText(doc.getString("password"));
+                        etPassword.setText("");
                         etCompany.setText(doc.getString("company"));
                         etLocation.setText(doc.getString("location"));
                         Boolean isActive = doc.getBoolean("is_active");
@@ -147,11 +151,12 @@ public class EditUserActivity extends AppCompatActivity {
 
         // Validate đơn giản (có thể thêm kiểm tra nâng cao nếu muốn)
         if (email.isEmpty() || fullname.isEmpty() || username.isEmpty() ||
-                phone.isEmpty() || password.isEmpty()) {
+                phone.isEmpty()) {
             Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (password.length() < 6) {
+
+        if (!password.isEmpty() && password.length() < 6) {
             Toast.makeText(this, "Mật khẩu tối thiểu 6 ký tự!", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -161,7 +166,9 @@ public class EditUserActivity extends AppCompatActivity {
         user.put("fullname", fullname);
         user.put("username", username);
         user.put("phone", phone);
-        user.put("password", password);
+        if (!password.isEmpty()) {
+            user.put("password", HashUtils.sha256(password));
+        }
         user.put("company", company);
         user.put("location", location);
         user.put("is_active", isActive);

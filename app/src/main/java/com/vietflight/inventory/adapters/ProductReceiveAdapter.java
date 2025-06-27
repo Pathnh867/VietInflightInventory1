@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.vietflight.inventory.R;
 import com.vietflight.inventory.models.HandoverItem;
 import com.vietflight.inventory.models.Product;
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,12 +47,19 @@ public class ProductReceiveAdapter extends RecyclerView.Adapter<ProductReceiveAd
         holder.tvQuantity.setText(String.valueOf(product.getQuantity()));
 
         // Load image from resource name
-        int imageResId = context.getResources().getIdentifier(
-                product.getImageName(), "drawable", context.getPackageName());
-        if (imageResId != 0) {
-            holder.ivImage.setImageResource(imageResId);
+        if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
+            Glide.with(context)
+                    .load(product.getImageUrl())
+                    .placeholder(R.drawable.product_default)
+                    .into(holder.ivImage);
         } else {
-            holder.ivImage.setImageResource(R.drawable.product_default);
+            int imageResId = context.getResources().getIdentifier(
+                    product.getImageName(), "drawable", context.getPackageName());
+            if (imageResId != 0) {
+                holder.ivImage.setImageResource(imageResId);
+            } else {
+                holder.ivImage.setImageResource(R.drawable.product_default);
+            }
         }
     }
 

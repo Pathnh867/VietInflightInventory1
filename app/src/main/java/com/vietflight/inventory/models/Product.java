@@ -8,12 +8,22 @@ public class Product {
     private String unit;
     private double price;
     private String imageName;
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    private String imageUrl;
     private boolean isActive;
     private int quantity = 0; // dùng khi tạo bàn giao
 
     public Product() {}
 
-    public Product(String id, String code, String name, String category, String unit, double price, String imageName) {
+    public Product(String id, String code, String name, String category, String unit, double price, String imageName, String imageUrl) {
         this.id = id;
         this.code = code;
         this.name = name;
@@ -21,6 +31,7 @@ public class Product {
         this.unit = unit;
         this.price = price;
         this.imageName = imageName;
+        this.imageUrl = imageUrl;
         this.isActive = true;
     }
 

@@ -17,6 +17,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.vietflight.inventory.R;
 import com.vietflight.inventory.utils.DataSeeder;
+import com.vietflight.inventory.utils.HashUtils;
+import com.vietflight.inventory.utils.PasswordMigrationUtil;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -35,9 +37,11 @@ public class LoginActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         sharedPreferences = getSharedPreferences("VietFlightPrefs", MODE_PRIVATE);
 
+        // Migrate bất kỳ mật khẩu văn bản thuần sang dạng hash
+        PasswordMigrationUtil.migrateAllUsersToHash();
+
         // Tạo dữ liệu test nếu cần
         createTestDataIfNeeded();
-
         // Kiểm tra đã đăng nhập chưa
         if (isUserLoggedIn()) {
             String role = sharedPreferences.getString("role", "");
@@ -114,7 +118,7 @@ public class LoginActivity extends AppCompatActivity {
     private void loginWithFirebase(String username, String password) {
         db.collection("users")
                 .whereEqualTo("username", username)
-                .whereEqualTo("password", password)
+                .whereEqualTo("password", HashUtils.sha256(password))
                 .get()
                 .addOnCompleteListener(task -> {
                     showLoading(false);

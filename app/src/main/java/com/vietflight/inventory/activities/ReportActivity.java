@@ -90,10 +90,10 @@ public class ReportActivity extends AppCompatActivity {
             // Nếu là admin thì chỉ hiện phần quản lý user, ẩn các item bàn giao
             if (createUserItem != null) createUserItem.setVisible(true);
             if (manageUserItem != null) manageUserItem.setVisible(true);
-
             if (createHandoverItem != null) createHandoverItem.setVisible(false);
             if (receiveHandoverItem != null) receiveHandoverItem.setVisible(false);
             if (reportItem != null) reportItem.setVisible(false);
+            menu.findItem(R.id.nav_products).setVisible(true);
         } else {
             // Nếu là user thường thì ngược lại
             if (createUserItem != null) createUserItem.setVisible(false);
