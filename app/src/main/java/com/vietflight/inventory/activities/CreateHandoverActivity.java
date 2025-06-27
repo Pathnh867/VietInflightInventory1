@@ -88,12 +88,14 @@ public class CreateHandoverActivity extends AppCompatActivity {
             menu.findItem(R.id.nav_report).setVisible(false);
             menu.findItem(R.id.nav_create_user).setVisible(true);
             menu.findItem(R.id.nav_manage_user).setVisible(true);
+            menu.findItem(R.id.nav_products).setVisible(true);
         } else {
             menu.findItem(R.id.nav_create).setVisible(true);
             menu.findItem(R.id.nav_receive).setVisible(true);
             menu.findItem(R.id.nav_report).setVisible(true);
             menu.findItem(R.id.nav_create_user).setVisible(false);
             menu.findItem(R.id.nav_manage_user).setVisible(false);
+            menu.findItem(R.id.nav_products).setVisible(false);
         }
 
         ImageView btnMenu = findViewById(R.id.btn_menu);
@@ -114,6 +116,8 @@ public class CreateHandoverActivity extends AppCompatActivity {
                 startActivity(new Intent(this, CreateUserActivity.class));
             } else if (id == R.id.nav_manage_user) {
                 startActivity(new Intent(this, ManageUserActivity.class));
+            } else if (id == R.id.nav_products) {
+                startActivity(new Intent(this, ProductsActivity.class));
             } else if (id == R.id.nav_logout) {
                 sharedPreferences.edit().clear().apply();
                 startActivity(new Intent(this, LoginActivity.class));
@@ -158,6 +162,8 @@ public class CreateHandoverActivity extends AppCompatActivity {
                             p.setName((String) map.get("name"));
                             p.setCategory((String) map.get("category"));
                             p.setImageName((String) map.get("imageName"));
+                            p.setImageUrl((String) map.get("imageUrl"));
+                            p.setImageUrl((String) map.get("imageUrl"));
                             p.setPrice(((Number) map.get("price")).intValue());
                             int qty = ((Number) map.get("quantity")).intValue();
                             allProducts.add(p);
@@ -445,6 +451,7 @@ public class CreateHandoverActivity extends AppCompatActivity {
                 item.put("name", p.getName());
                 item.put("category", p.getCategory());
                 item.put("imageName", p.getImageName());
+                item.put("imageUrl", p.getImageUrl());
                 item.put("price", p.getPrice());
                 item.put("quantity", qty);
                 items.add(item);

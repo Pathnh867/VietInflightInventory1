@@ -18,6 +18,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.vietflight.inventory.R;
+import com.vietflight.inventory.utils.HashUtils;
 
 public class ChangePasswordActivity extends AppCompatActivity {
 
@@ -54,12 +55,14 @@ public class ChangePasswordActivity extends AppCompatActivity {
             menu.findItem(R.id.nav_report).setVisible(false);
             menu.findItem(R.id.nav_create_user).setVisible(true);
             menu.findItem(R.id.nav_manage_user).setVisible(true);
+            menu.findItem(R.id.nav_products).setVisible(true);
         } else {
             menu.findItem(R.id.nav_create).setVisible(true);
             menu.findItem(R.id.nav_receive).setVisible(true);
             menu.findItem(R.id.nav_report).setVisible(true);
             menu.findItem(R.id.nav_create_user).setVisible(false);
             menu.findItem(R.id.nav_manage_user).setVisible(false);
+            menu.findItem(R.id.nav_products).setVisible(false);
         }
         // Drawer menu
         ImageView btnMenu = findViewById(R.id.btn_menu);
@@ -80,6 +83,8 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 startActivity(new Intent(this, CreateUserActivity.class));
             } else if (id == R.id.nav_manage_user) {
                 startActivity(new Intent(this, ManageUserActivity.class));
+            } else if (id == R.id.nav_products) {
+                startActivity(new Intent(this, ProductsActivity.class));
             } else if (id == R.id.nav_logout) {
                 sharedPreferences.edit().clear().apply();
                 startActivity(new Intent(this, LoginActivity.class));
@@ -118,7 +123,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
             showToast("Không xác thực được mật khẩu cũ!");
             return;
         }
-        if (!current.equals(oldPasswordInDb)) {
+        if (!HashUtils.sha256(current).equals(oldPasswordInDb)) {
             showToast("Mật khẩu hiện tại không đúng!");
             return;
         }
@@ -136,7 +141,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
         }
 
         db.collection("users").document(userId)
-                .update("password", newPass)
+                .update("password", HashUtils.sha256(newPass))
                 .addOnSuccessListener(aVoid -> {
                     showToast("Đổi mật khẩu thành công!");
                     clearForm();
@@ -171,7 +176,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
                } else {
                    initials += parts[0].substring(0,1);
                }
-               tvAvatar.setText("?");
+               tvAvatar.setText(initials.toUpperCase());
            }
         }
     }

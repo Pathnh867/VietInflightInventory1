@@ -90,10 +90,10 @@ public class ReportActivity extends AppCompatActivity {
             // Nếu là admin thì chỉ hiện phần quản lý user, ẩn các item bàn giao
             if (createUserItem != null) createUserItem.setVisible(true);
             if (manageUserItem != null) manageUserItem.setVisible(true);
-
             if (createHandoverItem != null) createHandoverItem.setVisible(false);
             if (receiveHandoverItem != null) receiveHandoverItem.setVisible(false);
             if (reportItem != null) reportItem.setVisible(false);
+            menu.findItem(R.id.nav_products).setVisible(true);
         } else {
             // Nếu là user thường thì ngược lại
             if (createUserItem != null) createUserItem.setVisible(false);
@@ -102,6 +102,7 @@ public class ReportActivity extends AppCompatActivity {
             if (createHandoverItem != null) createHandoverItem.setVisible(true);
             if (receiveHandoverItem != null) receiveHandoverItem.setVisible(true);
             if (reportItem != null) reportItem.setVisible(true);
+            menu.findItem(R.id.nav_products).setVisible(false);
         }
 
     }
@@ -177,6 +178,8 @@ public class ReportActivity extends AppCompatActivity {
                 startActivity(new Intent(this, ReceiveHandoverActivity.class));
             } else if (id == R.id.nav_report) {
                 // Đang ở đây
+            } else if (id == R.id.nav_products) {
+                startActivity(new Intent(this, ProductsActivity.class));
             } else if (id == R.id.nav_logout) {
                 logout();
             }

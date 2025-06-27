@@ -57,13 +57,19 @@ public class ProductHandoverAdapter extends RecyclerView.Adapter<ProductHandover
         holder.tvProductCode.setText("Mã: " + product.getCode() + " - " + formatPrice(product.getPrice()) + " đ");
 
         // Gán ảnh từ drawable nếu có
-        int imageResId = holder.itemView.getContext().getResources()
-                .getIdentifier(product.getImageName(), "drawable", holder.itemView.getContext().getPackageName());
-
-        if (imageResId != 0) {
-            holder.ivImage.setImageResource(imageResId);
+        if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(product.getImageUrl())
+                    .placeholder(R.drawable.product_default)
+                    .into(holder.ivImage);
         } else {
-            holder.ivImage.setImageResource(R.drawable.placeholder); // fallback nếu ảnh không tồn tại
+            int drawableResId = holder.itemView.getContext().getResources()
+                    .getIdentifier(product.getImageName(), "drawable", holder.itemView.getContext().getPackageName());
+            if (drawableResId != 0) {
+                holder.ivImage.setImageResource(drawableResId);
+            } else {
+                holder.ivImage.setImageResource(R.drawable.product_default);
+            }
         }
 
         // Gán số lượng
