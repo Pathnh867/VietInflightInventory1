@@ -62,12 +62,14 @@ public class ProfileActivity extends AppCompatActivity {
             menu.findItem(R.id.nav_report).setVisible(false);
             menu.findItem(R.id.nav_create_user).setVisible(true);
             menu.findItem(R.id.nav_manage_user).setVisible(true);
+            menu.findItem(R.id.nav_products).setVisible(true);
         } else {
             menu.findItem(R.id.nav_create).setVisible(true);
             menu.findItem(R.id.nav_receive).setVisible(true);
             menu.findItem(R.id.nav_report).setVisible(true);
             menu.findItem(R.id.nav_create_user).setVisible(false);
             menu.findItem(R.id.nav_manage_user).setVisible(false);
+            menu.findItem(R.id.nav_products).setVisible(false);
         }
 
         // Username: chỉ đọc
@@ -92,6 +94,8 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(new Intent(this, CreateUserActivity.class));
             } else if (id == R.id.nav_manage_user) {
                 startActivity(new Intent(this, ManageUserActivity.class));
+            } else if (id == R.id.nav_products) {
+                startActivity(new Intent(this, ProductsActivity.class));
             } else if (id == R.id.nav_logout) {
                 sharedPreferences.edit().clear().apply();
                 startActivity(new Intent(this, LoginActivity.class));

@@ -5,6 +5,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vietflight.inventory.utils.HashUtils;
+
 public class DataSeeder {
 
     private static final String TAG = "DataSeeder";
@@ -29,7 +31,7 @@ public class DataSeeder {
         // User 1: Supply Staff
         Map<String, Object> user1 = new HashMap<>();
         user1.put("username", "supply01");
-        user1.put("password", "123456");
+        user1.put("password", HashUtils.sha256("123456"));
         user1.put("fullname", "Nguyễn Văn An");
         user1.put("role", "supply_staff");
         user1.put("employee_id", "SUP001");
@@ -47,7 +49,7 @@ public class DataSeeder {
         // User 2: Flight Attendant
         Map<String, Object> user2 = new HashMap<>();
         user2.put("username", "attendant01");
-        user2.put("password", "123456");
+        user2.put("password", HashUtils.sha256("123456"));
         user2.put("fullname", "Trần Thị Bình");
         user2.put("role", "flight_attendant");
         user2.put("employee_id", "ATT001");
@@ -65,7 +67,7 @@ public class DataSeeder {
         // User 3: Admin
         Map<String, Object> user3 = new HashMap<>();
         user3.put("username", "admin");
-        user3.put("password", "admin123");
+        user3.put("password", HashUtils.sha256("admin123"));
         user3.put("fullname", "Lê Văn Quản");
         user3.put("role", "admin");
         user3.put("employee_id", "ADM001");
@@ -144,18 +146,18 @@ public class DataSeeder {
         Log.d(TAG, "Seeding products...");
 
         String[] products = {
-                "Cơm gà teriyaki,Suất Ăn Nóng,85000,suất",
-                "Mì Ý sốt bò bằm,Suất Ăn Nóng,85000,suất",
-                "Cơm chiên dương châu,Suất Ăn Nóng,75000,suất",
-                "Coca Cola,F & B,25000,lon",
-                "Pepsi,F & B,25000,lon",
-                "Nước suối,F & B,15000,chai",
-                "Cà phê VietJet,F & B,35000,ly",
-                "Trà xanh,F & B,20000,ly",
-                "Móc khóa VietJet,Hàng Lưu Niệm,50000,cái",
-                "Áo thun VietJet,Hàng Lưu Niệm,250000,cái",
-                "Mũ VietJet,Hàng Lưu Niệm,150000,cái",
-                "Set ăn Business,Sboss Business,150000,set"
+                "Cơm gà teriyaki,Suất Ăn Nóng,85000,suất,product_chicken_teriyaki",
+                "Mì Ý sốt bò bằm,Suất Ăn Nóng,85000,suất,product_pasta",
+                "Cơm chiên dương châu,Suất Ăn Nóng,75000,suất,product_fried_rice",
+                "Coca Cola,F & B,25000,lon,product_coca",
+                "Pepsi,F & B,25000,lon,product_coca",
+                "Nước suối,F & B,15000,chai,product_water",
+                "Cà phê VietJet,F & B,35000,ly,product_coffee",
+                "Trà xanh,F & B,20000,ly,product_tea",
+                "Móc khóa VietJet,Hàng Lưu Niệm,50000,cái,product_keychain",
+                "Áo thun VietJet,Hàng Lưu Niệm,250000,cái,product_tshirt",
+                "Mũ VietJet,Hàng Lưu Niệm,150000,cái,product_cap",
+                "Set ăn Business,Sboss Business,150000,set,product_business_meal"
         };
 
         for (int i = 0; i < products.length; i++) {
@@ -166,6 +168,7 @@ public class DataSeeder {
             product.put("category", parts[1]);
             product.put("price", Integer.parseInt(parts[2]));
             product.put("unit", parts[3]);
+            if (parts.length >= 5) product.put("imageName", parts[4]);
             product.put("is_active", true);
 
             final int index = i;

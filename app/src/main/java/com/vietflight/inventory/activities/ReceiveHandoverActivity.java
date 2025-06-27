@@ -80,6 +80,7 @@ public class ReceiveHandoverActivity extends AppCompatActivity {
             menu.findItem(R.id.nav_create).setVisible(false);
             menu.findItem(R.id.nav_receive).setVisible(false);
             menu.findItem(R.id.nav_report).setVisible(false);
+            menu.findItem(R.id.nav_products).setVisible(true);
         } else {
             // Các role còn lại
             menu.findItem(R.id.nav_create_user).setVisible(false);
@@ -87,6 +88,7 @@ public class ReceiveHandoverActivity extends AppCompatActivity {
             menu.findItem(R.id.nav_create).setVisible(true);
             menu.findItem(R.id.nav_receive).setVisible(true);
             menu.findItem(R.id.nav_report).setVisible(true);
+            menu.findItem(R.id.nav_products).setVisible(false);
         }
         setupDrawer();
         setupTabs();
@@ -184,6 +186,8 @@ public class ReceiveHandoverActivity extends AppCompatActivity {
                 startActivity(new Intent(this, ProfileActivity.class));
             } else if (id == R.id.nav_password) {
                 startActivity(new Intent(this, ChangePasswordActivity.class));
+            } else if (id == R.id.nav_products) {
+                startActivity(new Intent(this, ProductsActivity.class));
             } else if (id == R.id.nav_logout) {
                 logout();
             }
@@ -290,6 +294,7 @@ public class ReceiveHandoverActivity extends AppCompatActivity {
                             p.setName((String) map.get("name"));
                             p.setCategory((String) map.get("category"));
                             p.setImageName((String) map.get("imageName"));
+                            p.setImageUrl((String) map.get("imageUrl"));
                             p.setPrice(((Number) map.get("price")).intValue());
                             p.setQuantity(((Number) map.get("quantity")).intValue());
                             productList.add(p);
