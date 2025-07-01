@@ -21,6 +21,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+
+import java.io.IOException;
+import java.io.InputStream;
 import com.vietflight.inventory.R;
 
 import java.util.HashMap;
@@ -88,15 +91,40 @@ public class AddProductActivity extends AppCompatActivity {
         data.put("is_active", true);
 
         if (imageUri != null) {
-            StorageReference ref = FirebaseStorage.getInstance().getReference()
+            StorageReference ref = FirebaseStorage.getInstance()
+                    .getReference()
                     .child("products/" + System.currentTimeMillis() + ".jpg");
-            UploadTask uploadTask = ref.putFile(imageUri);
-            uploadTask.continueWithTask(task -> ref.getDownloadUrl())
-                    .addOnSuccessListener(uri -> {
-                        data.put("imageUrl", uri.toString());
-                        saveToFirestore(data);
-                    })
-                    .addOnFailureListener(e -> Toast.makeText(this, "Lỗi tải ảnh", Toast.LENGTH_SHORT).show());
+            InputStream stream;
+            try {
+                stream = getContentResolver().openInputStream(imageUri);
+                if (stream == null) {
+                    Toast.makeText(this, "Không đọc được ảnh", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                UploadTask uploadTask = ref.putStream(stream);
+                uploadTask
+                        .continueWithTask(task -> {
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+                            return ref.getDownloadUrl();
+                        })
+                        .addOnSuccessListener(uri -> {
+                            data.put("imageUrl", uri.toString());
+                            saveToFirestore(data);
+                        })
+                        .addOnFailureListener(e ->
+                                Toast.makeText(this, "Lỗi tải ảnh", Toast.LENGTH_SHORT).show())
+                        .addOnCompleteListener(task -> {
+                            try {
+                                stream.close();
+                            } catch (IOException ignored) {
+                            }
+                        });
+            } catch (IOException e) {
+                Toast.makeText(this, "Không đọc được ảnh", Toast.LENGTH_SHORT).show();
+            }
         } else {
             saveToFirestore(data);
         }
