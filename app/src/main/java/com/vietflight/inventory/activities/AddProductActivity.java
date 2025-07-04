@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -34,6 +35,7 @@ public class AddProductActivity extends AppCompatActivity {
     private ImageView ivPreview;
     private EditText etName, etCategory, etPrice, etUnit;
     private Uri imageUri;
+    private FirebaseAuth auth;
     private final ActivityResultLauncher<Intent> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
@@ -54,6 +56,11 @@ public class AddProductActivity extends AppCompatActivity {
         etUnit = findViewById(R.id.et_unit);
         ImageButton btnPick = findViewById(R.id.btn_pick_image);
         Button btnSave = findViewById(R.id.btn_save);
+        auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() == null) {
+            auth.signInAnonymously().addOnFailureListener(e ->
+                    Toast.makeText(this, "Không thể xác thực", Toast.LENGTH_SHORT).show());
+        }
 
         btnPick.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -65,6 +72,13 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     private void saveProduct() {
+        if (auth.getCurrentUser() == null) {
+            auth.signInAnonymously()
+                    .addOnSuccessListener(r -> saveProduct())
+                    .addOnFailureListener(e ->
+                            Toast.makeText(this, "Không thể xác thực", Toast.LENGTH_SHORT).show());
+            return;
+        }
         String name = etName.getText().toString().trim();
         String category = etCategory.getText().toString().trim();
         String priceStr = etPrice.getText().toString().trim();

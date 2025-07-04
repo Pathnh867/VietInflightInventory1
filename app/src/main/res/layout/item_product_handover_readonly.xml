@@ -57,16 +57,31 @@
             android:layout_marginTop="4dp" />
     </LinearLayout>
 
-    <!-- Quantity Display -->
-    <TextView
-        android:id="@+id/tv_quantity_readonly"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:gravity="center"
-        android:text="0"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        android:background="@drawable/edittext_border"
-        android:layout_gravity="center_vertical" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_vertical|center_horizontal">
+
+        <TextView
+            android:id="@+id/tv_quantity_readonly"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:text="0"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:background="@drawable/edittext_border"
+            android:layout_gravity="center_horizontal" />
+
+        <TextView
+            android:id="@+id/tv_restock_needed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
 </LinearLayout>

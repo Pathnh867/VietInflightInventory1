@@ -72,6 +72,7 @@ public class ReceiveHandoverActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("VietFlightPrefs", MODE_PRIVATE);
         setupNavHeader();
         String role = sharedPreferences.getString("role", "");
+        adapter.setShowRestock("supply_staff".equalsIgnoreCase(role));
         android.view.Menu menu = navView.getMenu();
         if ("admin".equalsIgnoreCase(role)) {
             // Chỉ hiện các mục dành cho admin
@@ -298,6 +299,7 @@ public class ReceiveHandoverActivity extends AppCompatActivity {
                             p.setQuantity(((Number) map.get("quantity")).intValue());
                             productList.add(p);
                         }
+                        adapter.setFlightType(flightType);
                         filterByCategory();
                     } else {
                         btnConfirm.setVisibility(View.GONE);
@@ -357,11 +359,20 @@ public class ReceiveHandoverActivity extends AppCompatActivity {
                             return;
                         }
                         DocumentReference docRef = doc.getReference();
+
+                        Map<String, Object> receivedBy = new HashMap<>();
+                        receivedBy.put("user_id", userId);
+                        receivedBy.put("fullname", fullname);
+                        receivedBy.put("role", sharedPreferences.getString("role", ""));
+                        receivedBy.put("employee_id", sharedPreferences.getString("employee_id", ""));
+                        receivedBy.put("department", sharedPreferences.getString("department", ""));
+
                         docRef.update(
                                 "status", "received",
                                 "isLocked", true,
                                 "receivedByUserId", userId,
                                 "receivedByUserName", fullname,
+                                "receivedBy", receivedBy,
                                 "receivedAt", System.currentTimeMillis()
                         ).addOnSuccessListener(unused -> {
                             Toast.makeText(this, "Xác nhận nhận bàn giao thành công", Toast.LENGTH_SHORT).show();

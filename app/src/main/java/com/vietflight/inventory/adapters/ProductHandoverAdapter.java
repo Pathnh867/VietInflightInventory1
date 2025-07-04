@@ -63,10 +63,15 @@ public class ProductHandoverAdapter extends RecyclerView.Adapter<ProductHandover
                     .placeholder(R.drawable.product_default)
                     .into(holder.ivImage);
         } else {
-            int drawableResId = holder.itemView.getContext().getResources()
-                    .getIdentifier(product.getImageName(), "drawable", holder.itemView.getContext().getPackageName());
-            if (drawableResId != 0) {
-                holder.ivImage.setImageResource(drawableResId);
+            String imageName = product.getImageName();
+            if (imageName != null && !imageName.isEmpty()) {
+                int drawableResId = holder.itemView.getContext().getResources()
+                        .getIdentifier(imageName, "drawable", holder.itemView.getContext().getPackageName());
+                if (drawableResId != 0) {
+                    holder.ivImage.setImageResource(drawableResId);
+                } else {
+                    holder.ivImage.setImageResource(R.drawable.product_default);
+                }
             } else {
                 holder.ivImage.setImageResource(R.drawable.product_default);
             }

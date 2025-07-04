@@ -24,14 +24,19 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
     private List<Handover> handoverList;
     private Context context;
     private OnUnlockClickListener unlockClickListener;
+    private String currentUserId;
+    private String currentEmployeeId;
 
     public interface OnUnlockClickListener {
         void onUnlock(Handover handover, int position);
     }
 
-    public ReportAdapter(Context context, List<Handover> handoverList, OnUnlockClickListener unlockClickListener) {
+    public ReportAdapter(Context context, List<Handover> handoverList, String currentUserId,
+                         String currentEmployeeId, OnUnlockClickListener unlockClickListener) {
         this.context = context;
         this.handoverList = handoverList;
+        this.currentUserId = currentUserId;
+        this.currentEmployeeId = currentEmployeeId;
         this.unlockClickListener = unlockClickListener;
     }
 
@@ -52,15 +57,29 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
         holder.tvFlightCode.setText(flightCode + " | " + flightDate);
 
         // Trạng thái
-        if ("received".equalsIgnoreCase(handover.getStatus()) && handover.isLocked()) {
+        boolean isReceived = "received".equalsIgnoreCase(handover.getStatus());
+        if (isReceived) {
             holder.tvStatus.setText("Đã nhận");
             holder.tvStatus.setTextColor(0xFF388E3C); // Xanh lá
-            holder.btnUnlock.setVisibility(View.VISIBLE);
         } else {
             holder.tvStatus.setText("Chưa nhận");
             holder.tvStatus.setTextColor(0xFFEA0029); // Đỏ
-            holder.btnUnlock.setVisibility(View.GONE);
         }
+
+        String receiverId = handover.getReceivedByUserId();
+        String receiverEmp = null;
+        if ((receiverId == null || receiverId.isEmpty()) && handover.getReceivedByMap() != null) {
+            Map<String, Object> rb = handover.getReceivedByMap();
+            Object idObj = rb.get("user_id");
+            if (idObj instanceof String) receiverId = (String) idObj;
+            Object empObj = rb.get("employee_id");
+            if (empObj instanceof String) receiverEmp = (String) empObj;
+        }
+        boolean canUnlock = handover.isLocked() && isReceived && (
+                (currentUserId != null && currentUserId.equals(receiverId)) ||
+                        (currentEmployeeId != null && currentEmployeeId.equals(receiverEmp))
+        );
+        holder.btnUnlock.setVisibility(canUnlock ? View.VISIBLE : View.GONE);
 
         // Aircraft, loại chuyến bay
         holder.tvAircraft.setText("Tàu bay: " + safe(handover.getAircraftId()));

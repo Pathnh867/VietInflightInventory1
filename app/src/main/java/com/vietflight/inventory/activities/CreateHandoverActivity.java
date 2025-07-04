@@ -29,6 +29,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.Query;
 import com.vietflight.inventory.R;
 import com.vietflight.inventory.adapters.ProductHandoverAdapter;
 import com.vietflight.inventory.models.Product;
@@ -308,53 +309,40 @@ public class CreateHandoverActivity extends AppCompatActivity {
             return;
         }
 
-        // Tìm xem đã có handover cho chuyến này chưa
+        // Clear dữ liệu cũ trước khi tải
+        allProducts.clear();
+        quantityMap.clear();
+        currentTabProducts.clear();
+        adapter.notifyDataSetChanged();
+        updateTotalCount();
+
+        // Tìm bàn giao gần nhất do phía đối tác tạo cho chuyến này
+        // (nếu mình là tiếp viên thì lấy của nhân viên cung ứng và ngược lại)
         db.collection("handovers")
-                .whereEqualTo("flightDate", flightDate)
-                .whereEqualTo("flightNumber", flightCode)
                 .whereEqualTo("aircraftId", aircraftCode)
+                .whereEqualTo("flightDate", flightDate)
                 .whereEqualTo("handoverType", flightType)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
-                    if (!querySnapshot.isEmpty()) {
-                        // ĐÃ CÓ BÀN GIAO: load lại bàn giao cũ lên UI
-                        DocumentSnapshot doc = querySnapshot.getDocuments().get(0);
-                        handoverId = doc.getId(); // Lưu lại để nếu cần update
-                        Boolean isLocked = doc.getBoolean("isLocked");
-
-                        // Gán dữ liệu chuyến bay lên UI nếu cần
-                        etFlightDate.setText(doc.getString("flightDate"));
-                        etFlightCode.setText(doc.getString("flightCode"));
-                        // Nếu muốn set lại spinner:
-                        String aircraft = doc.getString("aircraftCode");
-                        if (aircraft != null) setSpinnerToValue(spinnerAircraft, aircraft);
-                        String type = doc.getString("flightType");
-                        if (type != null) setSpinnerToValue(spinnerFlightType, type);
-
-                        // Load sản phẩm
-                        List<Map<String, Object>> items = (List<Map<String, Object>>) doc.get("items");
-                        allProducts.clear();
-                        quantityMap.clear();
-                        for (Map<String, Object> map : items) {
-                            Product p = new Product();
-                            p.setId((String) map.get("id"));
-                            p.setCode((String) map.get("code"));
-                            p.setName((String) map.get("name"));
-                            p.setCategory((String) map.get("category"));
-                            p.setImageName((String) map.get("imageName"));
-                            p.setPrice(((Number) map.get("price")).intValue());
-                            int qty = ((Number) map.get("quantity")).intValue();
-                            allProducts.add(p);
-                            quantityMap.put(p.getId(), qty);
+                    DocumentSnapshot latestDoc = null;
+                    long latestTime = -1L;
+                    String myRole = sharedPreferences.getString("role", "");
+                    String targetRole = "supply_staff".equalsIgnoreCase(myRole) ? "flight_attendant" : "supply_staff";
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        Map<String, Object> createdBy = (Map<String, Object>) doc.get("createdBy");
+                        String role = createdBy != null ? (String) createdBy.get("role") : "";
+                        if (targetRole.equalsIgnoreCase(role)) {
+                            Long t = doc.getLong("createdAt");
+                            if (t != null && t > latestTime) {
+                                latestTime = t;
+                                latestDoc = doc;
+                            }
                         }
-                        filterByCategory(currentCategory);
+                    }
 
-                        // Gọi hàm khóa nếu bị khóa
-                        handleLockedState(isLocked != null && isLocked);
-
-                        Toast.makeText(this, "Đã tải bàn giao đã tạo!", Toast.LENGTH_SHORT).show();
+                    if (latestDoc != null) {
+                        prefillQuantitiesFromHandover(latestDoc);
                     } else {
-                        // CHƯA CÓ BÀN GIAO: tạo mới template như cũ
                         loadNewProductTemplatesByFlightType(flightType);
                     }
                 })
@@ -363,6 +351,70 @@ public class CreateHandoverActivity extends AppCompatActivity {
                 });
     }
 
+    private void loadExistingHandover(DocumentSnapshot doc) {
+        handoverId = doc.getId();
+        Boolean isLocked = doc.getBoolean("isLocked");
+
+        etFlightDate.setText(doc.getString("flightDate"));
+        // Field may be stored as flightNumber in Firestore
+        String code = doc.getString("flightNumber");
+        if (code == null) code = doc.getString("flightCode");
+        if (code != null) etFlightCode.setText(code);
+        String aircraft = doc.getString("aircraftCode");
+        if (aircraft != null) setSpinnerToValue(spinnerAircraft, aircraft);
+        String type = doc.getString("flightType");
+        if (type != null) setSpinnerToValue(spinnerFlightType, type);
+
+        List<Map<String, Object>> items = (List<Map<String, Object>>) doc.get("items");
+        allProducts.clear();
+        quantityMap.clear();
+        if (items != null) {
+            for (Map<String, Object> map : items) {
+                Product p = new Product();
+                p.setId((String) map.get("id"));
+                p.setCode((String) map.get("code"));
+                p.setName((String) map.get("name"));
+                p.setCategory((String) map.get("category"));
+                p.setImageName((String) map.get("imageName"));
+                p.setPrice(((Number) map.get("price")).intValue());
+                int qty = ((Number) map.get("quantity")).intValue();
+                allProducts.add(p);
+                quantityMap.put(p.getId(), qty);
+            }
+        }
+
+        filterByCategory(currentCategory);
+        handleLockedState(isLocked != null && isLocked);
+        Toast.makeText(this, "Đã tải bàn giao đã tạo!", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Chỉ dùng để lấy lại số lượng sản phẩm từ bàn giao cũ khi tạo chuyến mới
+     * Không thay đổi thông tin chuyến bay hiện tại
+     */
+    private void prefillQuantitiesFromHandover(DocumentSnapshot doc) {
+        List<Map<String, Object>> items = (List<Map<String, Object>>) doc.get("items");
+        allProducts.clear();
+        quantityMap.clear();
+        if (items != null) {
+            for (Map<String, Object> map : items) {
+                Product p = new Product();
+                p.setId((String) map.get("id"));
+                p.setCode((String) map.get("code"));
+                p.setName((String) map.get("name"));
+                p.setCategory((String) map.get("category"));
+                p.setImageName((String) map.get("imageName"));
+                p.setPrice(((Number) map.get("price")).intValue());
+                int qty = ((Number) map.get("quantity")).intValue();
+                allProducts.add(p);
+                quantityMap.put(p.getId(), qty);
+            }
+        }
+        filterByCategory(currentCategory);
+        updateTotalCount();
+        btnCreateHandover.setVisibility(View.VISIBLE);
+        Toast.makeText(this, "Đã tải số lượng từ bàn giao trước", Toast.LENGTH_SHORT).show();
+    }
     /** Hàm này dùng để set spinner về đúng giá trị khi load bàn giao cũ */
     private void setSpinnerToValue(Spinner spinner, String value) {
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();

@@ -31,6 +31,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.HashMap;
 
 public class ReportActivity extends AppCompatActivity {
 
@@ -60,7 +61,10 @@ public class ReportActivity extends AppCompatActivity {
         navView = findViewById(R.id.nav_view);
 
         rvReport.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ReportAdapter(this, handoverList, (handover, pos) -> unlockHandover(handover, pos));
+        String myUserIdAdapter = sharedPreferences.getString("user_id", "");
+        String myEmployeeIdAdapter = sharedPreferences.getString("employee_id", "");
+        adapter = new ReportAdapter(this, handoverList, myUserIdAdapter, myEmployeeIdAdapter,
+                (handover, pos) -> unlockHandover(handover, pos));
         rvReport.setAdapter(adapter);
         etReportDate = findViewById(R.id.et_report_date);
         btnLoadReport = findViewById(R.id.btn_load_report);
@@ -123,6 +127,7 @@ public class ReportActivity extends AppCompatActivity {
         }
 
         String myUserId = sharedPreferences.getString("user_id", "");
+        String myEmployeeId = sharedPreferences.getString("employee_id", "");
 
         db.collection("handovers")
                 .whereEqualTo("flightDate", selectedDate)
@@ -135,19 +140,44 @@ public class ReportActivity extends AppCompatActivity {
                         Map<String, Object> receivedBy = (Map<String, Object>) doc.get("receivedBy");
 
                         String creatorId = createdBy != null ? (String) createdBy.get("user_id") : "";
-                        String receiverId = receivedBy != null ? (String) receivedBy.get("user_id") : "";
+                        String creatorEmp = createdBy != null ? (String) createdBy.get("employee_id") : "";
+                        String receiverId = "";
+                        String receiverEmp = "";
+                        if (receivedBy != null) {
+                            receiverId = (String) receivedBy.get("user_id");
+                            Object empObj = receivedBy.get("employee_id");
+                            if (empObj instanceof String) receiverEmp = (String) empObj;
+                        } else if (doc.contains("receivedByUserId")) {
+                            receiverId = doc.getString("receivedByUserId");
+                        }
 
-                        if (myUserId.equals(creatorId) || myUserId.equals(receiverId)) {
+                        boolean isMine = myUserId.equals(creatorId) || myUserId.equals(receiverId)
+                                || myEmployeeId.equals(creatorEmp) || myEmployeeId.equals(receiverEmp);
+
+                        if (isMine) {
                             Handover h = doc.toObject(Handover.class);
                             if (h == null) continue;
                             h.setId(doc.getId());
-
-                            // ... như phần xử lý cũ: set thêm info vào h nếu cần ...
                             if (createdBy != null && createdBy.get("fullname") != null) {
                                 h.setCreatedByUserName((String) createdBy.get("fullname"));
                             }
                             if (receivedBy != null && receivedBy.get("fullname") != null) {
                                 h.setReceivedByUserName((String) receivedBy.get("fullname"));
+                                h.setReceivedByMap(receivedBy);
+                                if (receivedBy.get("user_id") != null) {
+                                    h.setReceivedByUserId((String) receivedBy.get("user_id"));
+                                } else if (receivedBy.get("employee_id") != null) {
+                                    h.setReceivedByUserId((String) receivedBy.get("employee_id"));
+                                }
+                            } else if (doc.contains("receivedByUserName")) {
+                                h.setReceivedByUserName(doc.getString("receivedByUserName"));
+                                if (doc.contains("receivedByUserId")) {
+                                    Map<String, Object> rb = new HashMap<>();
+                                    rb.put("user_id", doc.getString("receivedByUserId"));
+                                    rb.put("fullname", doc.getString("receivedByUserName"));
+                                    h.setReceivedByMap(rb);
+                                    h.setReceivedByUserId(doc.getString("receivedByUserId"));
+                                }
                             }
                             if (doc.contains("isLocked")) {
                                 Boolean locked = doc.getBoolean("isLocked");
@@ -157,7 +187,6 @@ public class ReportActivity extends AppCompatActivity {
                                 String status = doc.getString("status");
                                 h.setStatus(status != null ? status : "");
                             }
-                            // Lưu ý: thêm setAircraftId... như cũ nếu cần
 
                             handoverList.add(h);
                         }
@@ -234,9 +263,19 @@ public class ReportActivity extends AppCompatActivity {
                         Map<String, Object> receivedBy = (Map<String, Object>) doc.get("receivedBy");
                         if (receivedBy != null && receivedBy.get("fullname") != null) {
                             h.setReceivedByUserName((String) receivedBy.get("fullname"));
-                        }
-                        if (receivedBy != null && receivedBy.get("employee_id") != null) {
-                            h.setReceivedByUserId((String) receivedBy.get("employee_id"));
+                            h.setReceivedByMap(receivedBy);
+                            if (receivedBy.get("employee_id") != null) {
+                                h.setReceivedByUserId((String) receivedBy.get("employee_id"));
+                            }
+                        } else if (doc.contains("receivedByUserName")) {
+                            h.setReceivedByUserName(doc.getString("receivedByUserName"));
+                            if (doc.contains("receivedByUserId")) {
+                                h.setReceivedByUserId(doc.getString("receivedByUserId"));
+                                Map<String, Object> rb = new HashMap<>();
+                                rb.put("user_id", doc.getString("receivedByUserId"));
+                                rb.put("fullname", doc.getString("receivedByUserName"));
+                                h.setReceivedByMap(rb);
+                            }
                         }
                         // ---- END ----
 
