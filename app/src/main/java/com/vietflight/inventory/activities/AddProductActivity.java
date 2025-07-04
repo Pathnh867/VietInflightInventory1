@@ -57,10 +57,6 @@ public class AddProductActivity extends AppCompatActivity {
         ImageButton btnPick = findViewById(R.id.btn_pick_image);
         Button btnSave = findViewById(R.id.btn_save);
         auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() == null) {
-            auth.signInAnonymously().addOnFailureListener(e ->
-                    Toast.makeText(this, "Không thể xác thực", Toast.LENGTH_SHORT).show());
-        }
 
         btnPick.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
