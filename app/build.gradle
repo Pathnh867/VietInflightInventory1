@@ -21,6 +21,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "boolean", "DEBUG", "false"
+        }
+        debug {
+            buildConfigField "boolean", "DEBUG", "true"
         }
     }
 
@@ -43,6 +47,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     implementation libs.firebase.firestore
     implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-appcheck-playintegrity'
+    implementation 'com.google.firebase:firebase-appcheck-debug'
     implementation 'androidx.core:core:1.16.0'
     implementation libs.firebase.auth
 
