@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.vietflight.inventory.R;
 import com.bumptech.glide.Glide;
+import android.util.Base64;
 
 import java.util.List;
 import java.util.Map;
@@ -50,8 +51,12 @@ public class ProductManageAdapter extends RecyclerView.Adapter<ProductManageAdap
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Map<String, Object> product = productList.get(position);
         Object imageUrl = product.get("imageUrl");
+        String imageBase64 = (String) product.get("imageBase64");
         if (imageUrl != null) {
             Glide.with(context).load(imageUrl).placeholder(R.drawable.product_default).into(holder.ivImage);
+        } else if (imageBase64 != null) {
+            byte[] bytes = Base64.decode(imageBase64, Base64.DEFAULT);
+            Glide.with(context).asBitmap().load(bytes).placeholder(R.drawable.product_default).into(holder.ivImage);
         } else if (product.get("imageName") != null) {
             int res = context.getResources().getIdentifier(product.get("imageName")+"", "drawable", context.getPackageName());
             if (res != 0) holder.ivImage.setImageResource(res);

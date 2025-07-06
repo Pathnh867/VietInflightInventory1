@@ -13,14 +13,17 @@ public class VietFlightApplication extends Application {
         super.onCreate();
         // Khởi tạo Firebase cho toàn bộ app
         FirebaseApp.initializeApp(this);
-        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
+        // Disable Firebase App Check until it's properly configured
+        // to avoid upload failures while obtaining tokens
+        /*FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
         if (BuildConfig.DEBUG) {
             firebaseAppCheck.installAppCheckProviderFactory(
                     DebugAppCheckProviderFactory.getInstance());
         } else {
             firebaseAppCheck.installAppCheckProviderFactory(
                     PlayIntegrityAppCheckProviderFactory.getInstance());
-        }
+        }*/
+
 
         FirebaseAuth.getInstance().signInAnonymously()
                 .addOnFailureListener(e ->

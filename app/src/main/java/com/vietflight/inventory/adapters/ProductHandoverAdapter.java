@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.vietflight.inventory.R;
 import com.vietflight.inventory.models.Product;
+import android.util.Base64;
 
 import java.util.List;
 import java.util.Locale;
@@ -56,10 +57,16 @@ public class ProductHandoverAdapter extends RecyclerView.Adapter<ProductHandover
         holder.tvProductName.setText(product.getName());
         holder.tvProductCode.setText("Mã: " + product.getCode() + " - " + formatPrice(product.getPrice()) + " đ");
 
-        // Gán ảnh từ drawable nếu có
         if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
             Glide.with(holder.itemView.getContext())
                     .load(product.getImageUrl())
+                    .placeholder(R.drawable.product_default)
+                    .into(holder.ivImage);
+        } else if (product.getImageBase64() != null && !product.getImageBase64().isEmpty()) {
+            byte[] bytes = Base64.decode(product.getImageBase64(), Base64.DEFAULT);
+            Glide.with(holder.itemView.getContext())
+                    .asBitmap()
+                    .load(bytes)
                     .placeholder(R.drawable.product_default)
                     .into(holder.ivImage);
         } else {

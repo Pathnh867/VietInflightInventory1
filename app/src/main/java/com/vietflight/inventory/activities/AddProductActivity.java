@@ -19,9 +19,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import android.graphics.Bitmap;
+import android.provider.MediaStore;
+import android.util.Base64;
+import java.io.ByteArrayOutputStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,37 +102,13 @@ public class AddProductActivity extends AppCompatActivity {
         data.put("is_active", true);
 
         if (imageUri != null) {
-            StorageReference ref = FirebaseStorage.getInstance()
-                    .getReference()
-                    .child("products/" + System.currentTimeMillis() + ".jpg");
-            InputStream stream;
             try {
-                stream = getContentResolver().openInputStream(imageUri);
-                if (stream == null) {
-                    Toast.makeText(this, "Không đọc được ảnh", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                UploadTask uploadTask = ref.putStream(stream);
-                uploadTask
-                        .continueWithTask(task -> {
-                            if (!task.isSuccessful()) {
-                                throw task.getException();
-                            }
-                            return ref.getDownloadUrl();
-                        })
-                        .addOnSuccessListener(uri -> {
-                            data.put("imageUrl", uri.toString());
-                            saveToFirestore(data);
-                        })
-                        .addOnFailureListener(e ->
-                                Toast.makeText(this, "Lỗi tải ảnh", Toast.LENGTH_SHORT).show())
-                        .addOnCompleteListener(task -> {
-                            try {
-                                stream.close();
-                            } catch (IOException ignored) {
-                            }
-                        });
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+                String encoded = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+                data.put("imageBase64", encoded);
+                saveToFirestore(data);
             } catch (IOException e) {
                 Toast.makeText(this, "Không đọc được ảnh", Toast.LENGTH_SHORT).show();
             }

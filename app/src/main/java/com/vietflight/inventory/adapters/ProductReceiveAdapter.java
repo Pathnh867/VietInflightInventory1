@@ -12,6 +12,7 @@ import com.vietflight.inventory.R;
 import com.vietflight.inventory.models.HandoverItem;
 import com.vietflight.inventory.models.Product;
 import com.bumptech.glide.Glide;
+import android.util.Base64;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,10 +68,17 @@ public class ProductReceiveAdapter extends RecyclerView.Adapter<ProductReceiveAd
         }
 
 
-        // Load image from resource name
+        // Load hình ảnh
         if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
             Glide.with(context)
                     .load(product.getImageUrl())
+                    .placeholder(R.drawable.product_default)
+                    .into(holder.ivImage);
+        } else if (product.getImageBase64() != null && !product.getImageBase64().isEmpty()) {
+            byte[] bytes = Base64.decode(product.getImageBase64(), Base64.DEFAULT);
+            Glide.with(context)
+                    .asBitmap()
+                    .load(bytes)
                     .placeholder(R.drawable.product_default)
                     .into(holder.ivImage);
         } else {

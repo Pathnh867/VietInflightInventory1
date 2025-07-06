@@ -295,6 +295,7 @@ public class ReceiveHandoverActivity extends AppCompatActivity {
                             p.setCategory((String) map.get("category"));
                             p.setImageName((String) map.get("imageName"));
                             p.setImageUrl((String) map.get("imageUrl"));
+                            p.setImageBase64((String) map.get("imageBase64"));
                             p.setPrice(((Number) map.get("price")).intValue());
                             p.setQuantity(((Number) map.get("quantity")).intValue());
                             productList.add(p);

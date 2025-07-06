@@ -163,7 +163,7 @@ public class CreateHandoverActivity extends AppCompatActivity {
                             p.setCategory((String) map.get("category"));
                             p.setImageName((String) map.get("imageName"));
                             p.setImageUrl((String) map.get("imageUrl"));
-                            p.setImageUrl((String) map.get("imageUrl"));
+                            p.setImageBase64((String) map.get("imageBase64"));
                             p.setPrice(((Number) map.get("price")).intValue());
                             int qty = ((Number) map.get("quantity")).intValue();
                             allProducts.add(p);
@@ -376,6 +376,7 @@ public class CreateHandoverActivity extends AppCompatActivity {
                 p.setName((String) map.get("name"));
                 p.setCategory((String) map.get("category"));
                 p.setImageName((String) map.get("imageName"));
+                p.setImageUrl((String) map.get("imageUrl"));
                 p.setPrice(((Number) map.get("price")).intValue());
                 int qty = ((Number) map.get("quantity")).intValue();
                 allProducts.add(p);
@@ -502,7 +503,8 @@ public class CreateHandoverActivity extends AppCompatActivity {
                 item.put("name", p.getName());
                 item.put("category", p.getCategory());
                 item.put("imageName", p.getImageName());
-                item.put("imageUrl", p.getImageUrl());
+                if (p.getImageUrl() != null) item.put("imageUrl", p.getImageUrl());
+                if (p.getImageBase64() != null) item.put("imageBase64", p.getImageBase64());
                 item.put("price", p.getPrice());
                 item.put("quantity", qty);
                 items.add(item);
